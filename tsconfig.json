@@ -1,0 +1,20 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+      "module": "commonjs",
+      "lib": ["es6"],
+      "target": "es6",
+      "removeComments": false,
+      "preserveConstEnums": true,
+      "importHelpers": false,
+      "esModuleInterop": true
+    },
+    "include": [
+      "packages/*/index.ts",
+      "packages/*/bin/**/*",
+      "packages/*/lib/**/*"
+    ],
+    "exclude": [
+      "**/node_modules",
+    ]
+  }
