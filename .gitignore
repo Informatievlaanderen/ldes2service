@@ -3,3 +3,4 @@
 **/test/**/*.js
 **/bin/**/*.js
 **/index.js
+.vscode
