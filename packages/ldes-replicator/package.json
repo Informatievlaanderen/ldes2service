@@ -10,7 +10,10 @@
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "index.d.ts",
+    "index.js"
   ],
   "repository": {
     "type": "git",
@@ -26,8 +29,9 @@
     "@ldes/types": "^0.0.0"
   },
   "dependencies": {
-    "@brechtvdv/actor-init-ldes-client": "^1.19.1",
+    "@treecg/actor-init-ldes-client": "^2.3.2",
     "@ldes/ldes-dummy-connector": "^0.0.0",
-    "@ldes/ldes-dummy-state": "^0.0.0"
+    "@ldes/ldes-dummy-state": "^0.0.0",
+    "@comunica/core": "~1.19.2"
   }
 }

@@ -13,6 +13,7 @@ export class DummyConnector implements IWritableConnector {
    */
   public async writeVersion(member: any): Promise<void> {
     this.members.push(member);
+    console.log('Number of processed events:', this.members.length);
   }
 
   /**

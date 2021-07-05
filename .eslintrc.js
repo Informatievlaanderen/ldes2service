@@ -45,6 +45,7 @@ module.exports = {
       'no-param-reassign': 'off',
       'func-style': 'off',
       'new-cap': 'off',
+      'no-console': 'off',
       'lines-around-comment': ['error', {
         beforeBlockComment: false,
         afterBlockComment: false,

@@ -3,7 +3,6 @@ import type { IState, IWritableConnector } from '@ldes/types';
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
- * It initializes the connectors
  */
 export class Orchestrator {
   private readonly connectors: IWritableConnector[];
@@ -19,21 +18,38 @@ export class Orchestrator {
   /**
    * Start listening to the events and pipe them to the connectors
    */
-  public run(): void {
-    throw new Error('not implemented');
+  public async run(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.ldes
+        .on('readable', () => this.processData())
+        .on('error', error => reject(error));
+
+      this.ldes.on('end', () => resolve());
+    });
   }
 
-  /**
-   * Run provision function of all connectors
-   */
-  public provision(): void {
-    throw new Error('not implemented');
+  public async provision(): Promise<void> {
+    const state = this.stateStore.provision();
+    const connectors = Promise.all(this.connectors.map(con => con.provision()));
+
+    await Promise.all([ state, connectors ]);
   }
 
   /**
    * Reset the state
    */
-  public reset(): void {
+  public reset(): Promise<void> {
     throw new Error('not implemented');
+  }
+
+  protected async processData(): Promise<void> {
+    let member: string = this.ldes.read();
+
+    while (member) {
+      const copiedMember = member;
+      await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
+
+      member = this.ldes.read();
+    }
   }
 }
