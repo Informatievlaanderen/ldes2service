@@ -1,4 +1,14 @@
 {
+  "command": {
+    "publish": {
+      "ignoreChanges": [
+        "*.md"
+      ],
+      "message": "Bump to release version %s",
+      "allowBranch": "master",
+      "npmClient": "npm"
+    }
+  },
   "packages": [
     "packages/*"
   ],

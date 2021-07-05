@@ -1,20 +1,29 @@
 {
-    "compileOnSave": true,
-    "compilerOptions": {
-      "module": "commonjs",
-      "lib": ["es6"],
-      "target": "es6",
-      "removeComments": false,
-      "preserveConstEnums": true,
-      "importHelpers": false,
-      "esModuleInterop": true
-    },
-    "include": [
-      "packages/*/index.ts",
-      "packages/*/bin/**/*",
-      "packages/*/lib/**/*"
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "lib": [
+      "es6",
+      "es2019",
+      "esnext.asynciterable"
     ],
-    "exclude": [
-      "**/node_modules",
-    ]
-  }
+    "target": "es2017",
+    "preserveConstEnums": true,
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+
+    "strict": true,
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false
+  },
+  "include": [
+    "packages/*/index.ts",
+    "packages/*/index-browser.ts",
+    "packages/*/bin/**/*",
+    "packages/*/lib/**/*"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/test/*"
+  ]
+}
