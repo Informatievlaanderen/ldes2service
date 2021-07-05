@@ -1,4 +1,4 @@
-import { IWritableConnector } from "@ldes/types";
+import type { IWritableConnector } from '@ldes/types';
 
 export class DummyConnector implements IWritableConnector {
   private readonly members: any[];
@@ -20,6 +20,5 @@ export class DummyConnector implements IWritableConnector {
    */
   public async provision(): Promise<void> {
     // Nothing to provision here
-    return;
   }
 }

@@ -6,7 +6,7 @@ export interface IState {
    */
   provision: () => Promise<void>;
 
-  /*
+  /**
    * Mark this page as the latest one that was processed
    */
   setLatestPage: (page: Url) => Promise<void>;

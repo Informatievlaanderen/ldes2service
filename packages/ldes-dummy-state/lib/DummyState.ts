@@ -1,5 +1,5 @@
-import { IState } from "@ldes/types";
-import { Url } from "url";
+import type { Url } from 'url';
+import type { IState } from '@ldes/types';
 
 export class DummyState implements IState {
   private readonly pages: Url[];
@@ -16,7 +16,7 @@ export class DummyState implements IState {
     return null;
   }
 
-  public async setLatestPage(page: Url) {
+  public async setLatestPage(page: Url): Promise<void> {
     this.pages.push(page);
   }
 
@@ -26,6 +26,5 @@ export class DummyState implements IState {
 
   public async provision(): Promise<void> {
     // Nothing to provision here
-    return;
   }
 }
