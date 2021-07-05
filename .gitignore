@@ -4,3 +4,4 @@
 **/bin/**/*.js
 **/index.js
 .vscode
+lerna-debug.log

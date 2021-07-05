@@ -1,6 +1,5 @@
 import { Readable } from "stream";
-import { IState } from "./interfaces/IState";
-import { IWritableConnector } from "./interfaces/IWritableConnector";
+import { IState, IWritableConnector } from "@ldes/types";
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
