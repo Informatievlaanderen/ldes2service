@@ -5,3 +5,4 @@
 **/index.js
 .vscode
 lerna-debug.log
+.eslintcache
