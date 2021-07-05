@@ -1,16 +1,19 @@
 {
-  "name": "@ldes/replicator",
+  "name": "@ldes/ldes-dummy-connector",
   "version": "0.0.0",
   "description": "> TODO: description",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
   "license": "ISC",
-  "main": "lib/ldes-replicator.js",
+  "main": "index.js",
+  "typings": "index",
   "directories": {
-    "lib": "lib",
-    "test": "__tests__"
+    "lib": "lib"
   },
   "files": [
-    "lib"
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "index.d.ts",
+    "index.js"
   ],
   "repository": {
     "type": "git",
@@ -24,9 +27,5 @@
   },
   "devDependencies": {
     "@ldes/types": "^0.0.0"
-  },
-  "dependencies": {
-    "@brechtvdv/actor-init-ldes-client": "^1.19.1",
-    "@ldes/ldes-dummy-connector": "^0.0.0"
   }
 }
