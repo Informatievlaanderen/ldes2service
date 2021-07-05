@@ -4,15 +4,15 @@ export interface IState {
   /**
    * Create tables for projection status, init counters, enable necessary plugins
    */
-  provision: () => void;
+  provision: () => Promise<void>;
 
   /**
    * Return the latest processed page
    */
-  getLatestPage: () => Url;
+  getLatestPage: () => Promise<Url>;
 
   /**
    * Return all processed pages
    */
-  getProcessedPaged: () => Url[];
+  getProcessedPaged: () => Promise<Url[]>;
 }
