@@ -29,7 +29,9 @@ export class PostgresConnector implements IWritableConnector {
     // LDES client can send us the same member several times, so we only add the ones with a new unique @id.
     const query = 'INSERT INTO "ldes" VALUES ($1, $2, $3, $4, $5) ON CONFLICT ("@id") DO NOTHING;';
 
-    const generatedAtTime = PostgresConnector.getDate(memberObject['http://www.w3.org/ns/prov#generatedAtTime']);
+    const generatedAtTime = PostgresConnector.getDate(
+      memberObject['http://www.w3.org/ns/prov#generatedAtTime']
+    );
 
     const values = [
       memberObject['@id'],
