@@ -21,7 +21,7 @@ async function run(): Promise<void> {
   const LDESClient = newEngine();
   const eventstreamSync = LDESClient.createReadStream(url, options);
 
-  const orchestrator = new Orchestrator([ connector ], state, eventstreamSync);
+  const orchestrator = new Orchestrator([connector], state, eventstreamSync);
 
   await orchestrator.provision();
   await orchestrator.run();

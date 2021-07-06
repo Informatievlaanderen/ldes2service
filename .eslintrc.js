@@ -9,7 +9,8 @@ module.exports = {
       'eslint-plugin-tsdoc',
       'eslint-plugin-import',
       'eslint-plugin-jest',
-      'eslint-plugin-unused-imports'
+      'eslint-plugin-unused-imports',
+      'prettier'
     ],
     extends: [
       'es/node',
@@ -36,6 +37,7 @@ module.exports = {
     },
     rules: {
       // Default
+      'array-bracket-spacing': 'off',
       'class-methods-use-this': 'off', // Conflicts with functions from interfaces that sometimes don't require `this`
       'comma-dangle': ['error', 'always-multiline'],
       'dot-location': ['error', 'property'],
