@@ -3,5 +3,5 @@
 const ldesMongodbConnector = require('..');
 
 describe('ldes-mongodb-connector', () => {
-    it('needs tests');
+  it('needs tests');
 });
