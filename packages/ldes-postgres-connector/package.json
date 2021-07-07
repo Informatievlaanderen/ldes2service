@@ -27,5 +27,9 @@
   },
   "devDependencies": {
     "@ldes/types": "^0.0.0"
+  },
+  "dependencies": {
+    "pg": "^8.6.0",
+    "@types/pg": "^8.6.0"
   }
 }
