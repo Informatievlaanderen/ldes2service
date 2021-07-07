@@ -29,9 +29,8 @@ export class PostgresConnector implements IWritableConnector {
     // LDES client can send us the same member several times, so we only add the ones with a new unique @id.
     const query = 'INSERT INTO "ldes" VALUES ($1, $2, $3, $4, $5) ON CONFLICT ("@id") DO NOTHING;';
 
-    const generatedAtTime = PostgresConnector.getDate(
-      memberObject['http://www.w3.org/ns/prov#generatedAtTime']
-    );
+    const dateProperty = memberObject['http://www.w3.org/ns/prov#generatedAtTime'];
+    const generatedAtTime = PostgresConnector.getDate(dateProperty);
 
     const values = [
       memberObject['@id'],
@@ -69,14 +68,14 @@ export class PostgresConnector implements IWritableConnector {
     await this.pool.query(query);
   }
 
-  private static getDate(memberProperty: string | { '@id': string }): Date | null {
+  private static getDate(dateProperty: string | { '@id': string }): Date | null {
     let generatedAtTime;
-    switch (typeof memberProperty) {
+    switch (typeof dateProperty) {
       case 'string':
-        generatedAtTime = new Date(memberProperty);
+        generatedAtTime = new Date(dateProperty);
         break;
       case 'object':
-        generatedAtTime = new Date(memberProperty['@id']);
+        generatedAtTime = new Date(dateProperty['@id']);
         break;
       default:
         generatedAtTime = null;
