@@ -1,0 +1,35 @@
+{
+  "name": "ldes-manager",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "homepage": "https://github.com/osoc21/ldes2service#readme",
+  "license": "ISC",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osoc21/ldes2service.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/osoc21/ldes2service/issues"
+  },
+  "dependencies": {
+    "@ldes/replicator": "^0.0.0",
+    "@treecg/actor-init-ldes-client": "^2.3.2",
+    "@ldes/ldes-dummy-connector": "^0.0.0",
+    "@ldes/ldes-dummy-state": "^0.0.0",
+    "@comunica/core": "~1.19.2"
+  },
+  "devDependencies": {
+    "@ldes/types": "^0.0.0"
+  }
+}
