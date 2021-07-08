@@ -6,7 +6,7 @@ export class MongoDBConnector implements IWritableConnector {
   private readonly config: any;
   private db: any;
 
-  public constructor(config:any) {
+  public constructor(config: any) {
     this.config = config;
   }
 
@@ -39,13 +39,14 @@ export class MongoDBConnector implements IWritableConnector {
     });
 
     // do we need to delete the others?
-    if(this.config.amountOfVersions > 0){
+    if (this.config.amountOfVersions > 0) {
       // count amount of versions
-      const results = await collection.find({
-        isVersionOf: isVersionOf,
-      })
-      .sort({date : -1})
-      .toArray();
+      const results = await collection
+        .find({
+          isVersionOf: isVersionOf,
+        })
+        .sort({ date: -1 })
+        .toArray();
 
       //console.log(results);
 
@@ -53,16 +54,15 @@ export class MongoDBConnector implements IWritableConnector {
       // delete te oldest
       const numberToDelete = results.length - this.config.amountOfVersions;
 
-      
-      if(numberToDelete > 0) {
+      if (numberToDelete > 0) {
         console.log('number to delete:', numberToDelete);
 
         //get the oldest to keep, and delete every after this one
 
-        const idsToRemove = results.slice(0, numberToDelete).map((value : any) => value._id);
+        const idsToRemove = results.slice(0, numberToDelete).map((value: any) => value._id);
         console.debug('ids :', idsToRemove);
- 
-        const deleted = await collection.deleteMany({_id: {$in: idsToRemove}});
+
+        const deleted = await collection.deleteMany({ _id: { $in: idsToRemove } });
       }
     }
   }
