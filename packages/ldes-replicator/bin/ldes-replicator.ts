@@ -3,6 +3,7 @@
  */
 
 import { DummyConnector } from '@ldes/ldes-dummy-connector';
+import { MongoDBConnector } from '../../ldes-mongodb-connector';
 import { DummyState } from '@ldes/ldes-dummy-state';
 
 import { newEngine } from '@treecg/actor-init-ldes-client';
@@ -14,7 +15,7 @@ const URL = process.env.URL;
 const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10);
 
 async function run(): Promise<void> {
-  const connector = new DummyConnector();
+  const connector = new MongoDBConnector({ amountOfVersions: 0 });
   const state = new DummyState();
 
   const options = {
