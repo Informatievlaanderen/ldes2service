@@ -1,12 +1,16 @@
 import type { IWritableConnector } from '@ldes/types';
-// import mongoose, { Schema } from 'mongoose';
+import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
 
-export class MongoDBConnector implements IWritableConnector {
-  private readonly config: any;
-  private db: any;
+interface IMongoDBConnectorConfig {
+  amountOfVersions: number;
+}
 
-  public constructor(config: any) {
+export class MongoDBConnector implements IWritableConnector {
+  private readonly config: IMongoDBConnectorConfig;
+  private db: Db;
+
+  public constructor(config: IMongoDBConnectorConfig) {
     this.config = config;
   }
 
@@ -15,7 +19,7 @@ export class MongoDBConnector implements IWritableConnector {
    * @param member
    */
   public async writeVersion(member: any): Promise<void> {
-    var JSONmember;
+    let JSONmember;
     try {
       JSONmember = JSON.parse(member);
     } catch {
@@ -24,33 +28,34 @@ export class MongoDBConnector implements IWritableConnector {
 
     const collection = this.db.collection('ldes');
 
-    let id = JSONmember['@id'];
-    let type = JSONmember['@type'];
-    let time = JSONmember['http://www.w3.org/ns/prov#generatedAtTime'];
-    let isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
+    const id = JSONmember['@id'];
+    const type = JSONmember['@type'];
+    const time = JSONmember['http://www.w3.org/ns/prov#generatedAtTime'];
 
-    //insert anyway
-    const result = await collection.insertOne({
-      id: id,
+    // This needs to become more generic:
+    // @see https://github.com/osoc21/ldes2service/issues/20
+    const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
+
+    // Insert anyway
+    await collection.insertOne({
+      id,
       date: time,
-      type: type,
-      isVersionOf: isVersionOf,
+      type,
+      isVersionOf,
       data: member,
     });
 
-    // do we need to delete the others?
+    // Do we need to delete the others?
     if (this.config.amountOfVersions > 0) {
-      // count amount of versions
+      // Count amount of versions
       const results = await collection
         .find({
-          isVersionOf: isVersionOf,
+          isVersionOf,
         })
         .sort({ date: -1 })
         .toArray();
 
-      //console.log(results);
-
-      // if more than amountOfVersions
+      // If more than amountOfVersions
       // delete te oldest
       const numberToDelete = results.length - this.config.amountOfVersions;
 
@@ -60,7 +65,7 @@ export class MongoDBConnector implements IWritableConnector {
         const idsToRemove = results.slice(0, numberToDelete).map((value: any) => value._id);
         console.debug('ids :', idsToRemove);
 
-        const deleted = await collection.deleteMany({ _id: { $in: idsToRemove } });
+        await collection.deleteMany({ _id: { $in: idsToRemove } });
       }
     }
   }
@@ -76,14 +81,12 @@ export class MongoDBConnector implements IWritableConnector {
     try {
       // Connect the client to the server
       await client.connect();
+
       // Establish and verify connection
-      this.db = await client.db('ldes');
+      this.db = client.db('ldes');
       console.log('Connected successfully to server');
-    } catch (err: any) {
-      console.log(err);
-    } finally {
-      // Ensures that the client will close when you finish/error
-      //await client.close();
+    } catch (error: unknown) {
+      console.log(error);
     }
   }
 }
