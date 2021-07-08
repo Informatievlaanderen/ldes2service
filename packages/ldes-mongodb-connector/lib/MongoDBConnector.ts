@@ -3,11 +3,11 @@ import type { IWritableConnector } from '@ldes/types';
 import { MongoClient } from 'mongodb';
 
 export class MongoDBConnector implements IWritableConnector {
-  private readonly members: any[];
+  private readonly config: any;
   private db: any;
 
-  public constructor() {
-    this.members = [];
+  public constructor(config:any) {
+    this.config = config;
   }
 
   /**
@@ -29,6 +29,7 @@ export class MongoDBConnector implements IWritableConnector {
     let time = JSONmember['http://www.w3.org/ns/prov#generatedAtTime'];
     let isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
 
+    //insert anyway
     const result = await collection.insertOne({
       id: id,
       date: time,
@@ -36,6 +37,34 @@ export class MongoDBConnector implements IWritableConnector {
       isVersionOf: isVersionOf,
       data: member,
     });
+
+    // do we need to delete the others?
+    if(this.config.amountOfVersions > 0){
+      // count amount of versions
+      const results = await collection.find({
+        isVersionOf: isVersionOf,
+      })
+      .sort({date : -1})
+      .toArray();
+
+      //console.log(results);
+
+      // if more than amountOfVersions
+      // delete te oldest
+      const numberToDelete = results.length - this.config.amountOfVersions;
+
+      
+      if(numberToDelete > 0) {
+        console.log('number to delete:', numberToDelete);
+
+        //get the oldest to keep, and delete every after this one
+
+        const idsToRemove = results.slice(0, numberToDelete).map((value : any) => value._id);
+        console.debug('ids :', idsToRemove);
+ 
+        const deleted = await collection.deleteMany({_id: {$in: idsToRemove}});
+      }
+    }
   }
 
   /**
