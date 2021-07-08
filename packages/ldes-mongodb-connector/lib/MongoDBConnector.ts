@@ -57,8 +57,6 @@ export class MongoDBConnector implements IWritableConnector {
       if (numberToDelete > 0) {
         console.log('number to delete:', numberToDelete);
 
-        //get the oldest to keep, and delete every after this one
-
         const idsToRemove = results.slice(0, numberToDelete).map((value: any) => value._id);
         console.debug('ids :', idsToRemove);
 
