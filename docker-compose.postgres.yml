@@ -16,11 +16,16 @@ services:
 
   replicator:
     build: .
+    command: sh
+    tty: true
+    stdin_open: true
     environment:
       POSTGRES_NAME: "ldes"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: "backend"
+    volumes:
+      - "./packages:/app/packages"
     depends_on:
       - backend
 
