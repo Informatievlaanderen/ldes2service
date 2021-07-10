@@ -4,10 +4,12 @@ import { MongoClient } from 'mongodb';
 
 interface IMongoDBConnectorConfig {
   amountOfVersions: number;
+  databaseName: string;
 }
 
 export class MongoDBConnector implements IWritableConnector {
   private readonly config: IMongoDBConnectorConfig;
+  private client: MongoClient;
   private db: Db;
 
   public constructor(config: IMongoDBConnectorConfig) {
@@ -30,7 +32,7 @@ export class MongoDBConnector implements IWritableConnector {
 
     const id = JSONmember['@id'];
     const type = JSONmember['@type'];
-    const time = JSONmember['http://www.w3.org/ns/prov#generatedAtTime'];
+    const time = new Date(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']);
 
     // This needs to become more generic:
     // @see https://github.com/osoc21/ldes2service/issues/20
@@ -52,7 +54,7 @@ export class MongoDBConnector implements IWritableConnector {
         .find({
           isVersionOf,
         })
-        .sort({ date: -1 })
+        .sort({ date: 1 })
         .toArray();
 
       // If more than amountOfVersions
@@ -76,17 +78,20 @@ export class MongoDBConnector implements IWritableConnector {
   public async provision(): Promise<void> {
     const url = 'mongodb://localhost:27017';
 
-    const client = new MongoClient(url);
+    this.client = new MongoClient(url);
 
-    try {
-      // Connect the client to the server
-      await client.connect();
+    // Connect the client to the server
+    await this.client.connect();
 
-      // Establish and verify connection
-      this.db = client.db('ldes');
-      console.log('Connected successfully to server');
-    } catch (error: unknown) {
-      console.log(error);
-    }
+    // Establish and verify connection
+    this.db = this.client.db(this.config.databaseName);
+    console.log('Connected successfully to server');
+  }
+
+  /**
+   * Stops asynchronous operations
+   */
+  public async stop(): Promise<void> {
+    await this.client.close();
   }
 }
