@@ -132,6 +132,7 @@ module.exports = {
 
     // TODO: Try to re-enable the following rules in the future
     'global-require': 'off',
+    'no-process-env': 'off',
     '@typescript-eslint/no-require-imports': 'off',
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-unused-vars': 'off',

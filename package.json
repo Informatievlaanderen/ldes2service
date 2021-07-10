@@ -8,6 +8,7 @@
     "node": ">=16.0"
   },
   "scripts": {
+    "start": "cd packages/ldes-replicator && npm run start",
     "build-changed": "lerna run build --since HEAD",
     "build": "npm run build:ts",
     "build:ts": "tsc",
@@ -15,7 +16,7 @@
     "test:integration:docker": "docker-compose -f docker-compose.test.yml up -d && npm run test:integration && docker-compose -f docker-compose.test.yml down",
     "eslint": "eslint --ext ts",
     "eslint:cache": "npm run eslint -- --cache",
-    "prettier": "prettier --check \"./**/*.{ts,json,md}\"",
+    "prettier": "prettier --check \"./**/*.{ts,json,md,yml}\"",
     "lint": "npm run eslint && npm run prettier",
     "lint:fix": "npm run eslint -- --fix && npm run prettier -- --write",
     "clean": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules",
@@ -49,5 +50,8 @@
     "singleQuote": true,
     "printWidth": 110,
     "arrowParens": "avoid"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0"
   }
 }

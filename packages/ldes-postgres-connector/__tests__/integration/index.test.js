@@ -1,10 +1,10 @@
-const { MongoDBConnector } = require('../..');
+const { PostgresConnector } = require('../..');
 
-describe('ldes-mongodb-connector', () => {
+describe('ldes-postgres-connector', () => {
   let connector;
 
   beforeEach(async () => {
-    connector = new MongoDBConnector({
+    connector = new PostgresConnector({
       amountOfVersions: 2,
       databaseName: 'ldes',
     });
@@ -14,7 +14,7 @@ describe('ldes-mongodb-connector', () => {
 
   afterEach(async () => {
     try {
-      await connector.db.collection('ldes').drop();
+      await connector.poolClient.query('TRUNCATE ldes');
     } catch {}
 
     await connector.stop();
@@ -31,7 +31,7 @@ describe('ldes-mongodb-connector', () => {
     });
 
     await connector.writeVersion(member);
-    const items = await connector.db.collection('ldes').find().toArray();
+    const { rows: items } = await connector.poolClient.query('SELECT * FROM ldes');
 
     expect(items.length).toBe(1);
 
@@ -42,7 +42,7 @@ describe('ldes-mongodb-connector', () => {
           type: 'type_1',
           is_version_of: '1',
           generated_at: new Date('2021-07-10T11:05:00.000Z'),
-          data: member,
+          data: JSON.parse(member),
         }),
       ])
     );
@@ -80,7 +80,7 @@ describe('ldes-mongodb-connector', () => {
     await connector.writeVersion(member2);
     await connector.writeVersion(member3);
 
-    const items = await connector.db.collection('ldes').find().toArray();
+    const { rows: items } = await connector.poolClient.query('SELECT * FROM ldes');
 
     expect(items.length).toBe(2);
     expect(items).toEqual(
