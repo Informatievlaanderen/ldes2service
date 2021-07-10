@@ -2,11 +2,10 @@
  * CLI interface where manual dependency injection happens
  */
 
-import { DummyConnector } from '@ldes/ldes-dummy-connector';
-import { MongoDBConnector } from '../../ldes-mongodb-connector';
 import { DummyState } from '@ldes/ldes-dummy-state';
 
 import { newEngine } from '@treecg/actor-init-ldes-client';
+import { MongoDBConnector } from '../../ldes-mongodb-connector';
 import { Orchestrator } from '../lib/Orchestrator';
 
 // TODO: Parse and use CLI parameters
@@ -15,7 +14,7 @@ const URL = process.env.URL;
 const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10);
 
 async function run(): Promise<void> {
-  const connector = new MongoDBConnector({ amountOfVersions: 0 });
+  const connector = new MongoDBConnector({ amountOfVersions: 0, databaseName: 'ldes' });
   const state = new DummyState();
 
   const options = {
