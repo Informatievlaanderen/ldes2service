@@ -38,5 +38,8 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Setup environment variables
+        run: mv .env.test .env
+
       - name: Test
-        run: npm run test:integration:docker 
+        run: npm run test:integration:docker

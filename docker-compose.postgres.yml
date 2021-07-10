@@ -1,16 +1,16 @@
-version: "3"
+version: '3'
 
 services:
   backend:
     image: postgres:13
     environment:
-      POSTGRES_DB: "ldes"
+      POSTGRES_DB: 'ldes'
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   #redis:
 
@@ -20,12 +20,12 @@ services:
     tty: true
     stdin_open: true
     environment:
-      POSTGRES_NAME: "ldes"
+      POSTGRES_NAME: 'ldes'
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: "backend"
+      POSTGRES_HOST: 'backend'
     volumes:
-      - "./packages:/app/packages"
+      - './packages:/app/packages'
     depends_on:
       - backend
 

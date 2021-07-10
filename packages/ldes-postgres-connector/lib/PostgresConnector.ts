@@ -1,26 +1,14 @@
-import type { IWritableConnector } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector } from '@ldes/types';
+import type { PoolClient } from 'pg';
 import { Pool } from 'pg';
 
-const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
-const POSTGRES_HOST = process.env.POSTGRES_HOST || 'localhost';
-const POSTGRES_NAME = process.env.POSTGRES_NAME || 'postgres';
-const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
-const POSTGRES_PORT = Number.parseInt(process.env.POSTGRES_PORT || '5432', 10);
-
 export class PostgresConnector implements IWritableConnector {
-  private readonly pool: Pool;
-  private readonly configuration: Record<string, any>;
+  private readonly config: IConfigConnector;
+  private pool: Pool;
+  private poolClient: PoolClient;
 
-  public constructor(configuration: Record<string, any>) {
-    this.pool = new Pool({
-      user: POSTGRES_USER,
-      host: POSTGRES_HOST,
-      database: POSTGRES_NAME,
-      password: POSTGRES_PASSWORD,
-      port: POSTGRES_PORT,
-    });
-
-    this.configuration = configuration;
+  public constructor(config: IConfigConnector) {
+    this.config = config;
   }
 
   /**
@@ -28,114 +16,90 @@ export class PostgresConnector implements IWritableConnector {
    * @param member
    */
   public async writeVersion(member: string): Promise<void> {
-    const memberObject = JSON.parse(member);
-    if (this.configuration.amountOfVersions) {
-      await this.writeLatestVersions(memberObject, this.configuration.amountOfVersions);
-    } else {
-      await this.writeEveryVersion(memberObject);
-    }
-  }
+    const JSONmember = JSON.parse(member);
 
-  /**
-   * Writes a version to the corresponding backend system, if we store all the versions.
-   * @param memberObject
-   * @private
-   */
-  private async writeEveryVersion(memberObject: Record<string, any>): Promise<void> {
-    // LDES client can send us the same member several times, so we only add the ones with a new unique @id.
-    const query = 'INSERT INTO "ldes" VALUES ($1, $2, $3, $4, $5) ON CONFLICT ("@id") DO NOTHING;';
+    // This needs to become more generic:
+    // @see https://github.com/osoc21/ldes2service/issues/20
+    const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
 
-    const dateProperty = memberObject['http://www.w3.org/ns/prov#generatedAtTime'];
-    const generatedAtTime = PostgresConnector.getDate(dateProperty);
+    const memberObject = {
+      id: JSONmember['@id'],
+      type: JSONmember['@type'],
+      generated_at: PostgresConnector.getDate(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
+      is_version_of: isVersionOf,
+      data: member,
+    };
 
-    const values = [
-      memberObject['@id'],
-      memberObject['@type'],
-      memberObject['http://purl.org/dc/terms/isVersionOf']['@id'],
-      generatedAtTime,
-      memberObject,
-    ];
-    this.pool.query(query, values, (err, res) => {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('New entry added to the postgres database.');
+    const query = `INSERT INTO ldes(id, generated_at, type, is_version_of, data) 
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT ("id") DO NOTHING;`;
+
+    await this.poolClient.query(query, [
+      memberObject.id,
+      memberObject.generated_at,
+      memberObject.type,
+      memberObject.is_version_of,
+      memberObject.data,
+    ]);
+
+    if (this.config.amountOfVersions > 0) {
+      const { rows: results } = await this.poolClient.query(
+        `SELECT * FROM ${this.config.databaseName} WHERE is_version_of = $1 ORDER BY generated_at ASC`,
+        [memberObject.is_version_of]
+      );
+
+      const numberToDelete = results.length - this.config.amountOfVersions;
+
+      if (numberToDelete > 0) {
+        const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
+
+        await this.pool.query(
+          `DELETE FROM ${this.config.databaseName} WHERE id IN (${idsToRemove.join(', ')})`
+        );
       }
-    });
-  }
-
-  /**
-   * Writes a version to the corresponding backend system, if we only want to keep the X latest versions.
-   * @param memberObject
-   * @param amountOfVersions
-   * @private
-   */
-  private async writeLatestVersions(
-    memberObject: Record<string, any>,
-    amountOfVersions: number,
-  ): Promise<void> {
-    try {
-      // 1st request: Check that the new member isn't already in the db.
-      const query1 = 'SELECT count(*) as c FROM ldes WHERE "@id"=$1;';
-      const res = await this.pool.query(query1, [memberObject['@id']]);
-      if (Number.parseInt(res.rows[0].c, 10)) {
-        console.log('Member already exists.', memberObject['@id']);
-        return;
-      }
-
-      // 2nd request: Amount of versions currently in the db.
-      const query2 = 'SELECT count("@id") as c FROM ldes WHERE "isVersionOf"=$1;';
-      const versions = await this.pool.query(query2, [
-        memberObject['http://purl.org/dc/terms/isVersionOf']['@id'],
-      ]);
-      if (versions.rowCount && Number.parseInt(versions.rows[0].c, 10) < amountOfVersions) {
-        console.log('Version limit not reached.', versions.rows[0].c, amountOfVersions);
-        return this.writeEveryVersion(memberObject);
-      }
-
-      // If == amountOfVersions, we need to get rid of one.
-      // 3rd request: Get the timestamp of the oldest version in the DB.
-      const query3 = `SELECT "@id", "generatedAtTime" FROM ldes 
-          WHERE "isVersionOf"=$1 ORDER BY "generatedAtTime" LIMIT 1;`;
-      const oldestVersion = await this.pool.query(query3, [
-        memberObject['http://purl.org/dc/terms/isVersionOf']['@id'],
-      ]);
-      const dbOldestDate = PostgresConnector.getDate(oldestVersion.rows[0].generatedAtTime);
-      const memberDate = PostgresConnector.getDate(memberObject['http://www.w3.org/ns/prov#generatedAtTime']);
-      if (memberDate && dbOldestDate && memberDate > dbOldestDate) {
-        // We get rid of the oldest one, either the new one or the one in the DB. (0 or 2 requests)
-        const query4 = 'DELETE FROM ldes WHERE "@id"=$1';
-        await this.pool.query(query4, [oldestVersion.rows[0]['@id']]);
-        // Add the new member
-        console.log('Member replaced older version.');
-        return this.writeEveryVersion(memberObject);
-      }
-      console.log('Member is older than what we currently store.', dbOldestDate, memberDate);
-    } catch (error: unknown) {
-      console.error(error);
     }
   }
 
   /**
    * Initializes the backend system by creating tables, counters and/or enabling plugins
    * Table definition:
-   *   "@id" URI representing the event
-   *   "@type" URI representing the event type
-   *   "http://purl.org/dc/terms/isVersionOf" URI for the main object this snapshot represents
-   *   "http://www.w3.org/ns/prov#generatedAtTime" Timestamp generation (value or object[@value])
-   *   "content" The rest
+   *   "id" URI representing the event
+   *   "type" URI representing the event type
+   *   "is_version_of" URI for the main object this snapshot represents
+   *   "generated_at" Timestamp generation (value or object[@value])
+   *   "data" The rest
    */
   public async provision(): Promise<void> {
-    const query = `CREATE TABLE IF NOT EXISTS "ldes"
-        ("@id" TEXT PRIMARY KEY,
-        "@type" TEXT NOT NULL,
-        "isVersionOf" TEXT,
-        "generatedAtTime" TIMESTAMP,
-        "content" JSONB NOT NULL);`;
+    this.pool = new Pool({
+      user: process.env.POSTGRES_USER || 'postgres',
+      host: process.env.POSTGRES_HOST || 'localhost',
+      database: process.env.POSTGRES_NAME || 'postgres',
+      password: process.env.POSTGRES_PASSWORD,
+      port: Number.parseInt(process.env.POSTGRES_PORT || '5432', 10),
+    });
 
-    await this.pool.query(query);
+    this.poolClient = await this.pool.connect();
+
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS ${this.config.databaseName}
+        (id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        is_version_of TEXT,
+        generated_at TIMESTAMP,
+        data JSONB NOT NULL);`);
+
+    // We'll probably need to add more indexes to other columns
+    // await this.pool.query(`CREATE INDEX ON ${this.config.databaseName} (id)`);
   }
 
+  /**
+   * Stops asynchronous operations
+   */
+  public async stop(): Promise<void> {
+    this.poolClient.release();
+    return this.pool.end();
+  }
+
+  // TODO: port this to other connectors
   private static getDate(dateProperty: string | { '@id': string }): Date | null {
     let generatedAtTime;
     switch (typeof dateProperty) {

@@ -6,4 +6,4 @@
 .vscode
 lerna-debug.log
 .eslintcache
-/.env
+.env
