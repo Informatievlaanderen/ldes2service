@@ -1,76 +1,65 @@
-import { DummyConnector } from '@ldes/ldes-dummy-connector';
-import { DummyState } from '@ldes/ldes-dummy-state';
-import { Orchestrator } from '@ldes/replicator';
+import { QueryService } from './QueryService';
 
-import { newEngine } from '@treecg/actor-init-ldes-client';
-
-interface IOrchestratorConfig {
+export interface IReplicatorConfig {
   name: string;
   url: string;
   pollingInterval: number;
 }
 
-interface IManagerConfig {
-  orchestrators: IOrchestratorConfig[];
+export interface IQueryServiceConfig {
+  name: string;
+  description: string;
+  settings: Record<string, any>;
+  connector: string;
+  replicators: IReplicatorConfig[];
 }
 
-const config = {
-  orchestrators: [
-    {
-      name: 'GentObjecten',
-      url: 'https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/objecten',
-      pollingInterval: 5_000,
-      integrations: [],
-      backends: [],
-    },
-  ],
-};
+export interface IManagerConfig {
+  state: any;
+  connectors: Record<string, any>;
+  queryServices: IQueryServiceConfig[];
+}
 
 /**
- * The Manager will, from a set configuration launch a series of Orchestrators and handle their behaviour.
+ * The Manager will, from a set config launch a series of QueryServices and handle their behavior.
  */
 export class Manager {
-  private readonly orchestrators: Record<string, Orchestrator>;
-  private readonly configuration: IManagerConfig;
+  private readonly queryServices: Record<string, QueryService>;
+  private readonly connectors: Record<string, any>;
 
-  public constructor() {
-    this.configuration = config;
+  public constructor(private readonly config: IManagerConfig) {
+    this.connectors = config.connectors;
   }
 
-  /**
-   * Add a new orchestrator to the ones managed by this Manager.
-   * @param orchestratorConfig The configuration the orchestrator needs.
-   * @private
-   */
-  private async addOrchestrator(orchestratorConfig: IOrchestratorConfig): Promise<void> {
-    const options = {
-      pollingInterval: orchestratorConfig.pollingInterval,
-    };
+  public async addQueryService(config: IQueryServiceConfig): Promise<void> {
+    if (Object.keys(this.queryServices).includes(config.name)) {
+      console.error(`The Query Service ${config.name} already exists!`);
+      return;
+    }
+    if (!Object.keys(this.connectors).includes(config.connector)) {
+      console.error(`The Connector ${config.name} doesn't exist!`);
+      return;
+    }
 
-    const connector = new DummyConnector();
-    const state = new DummyState();
+    const queryService = new QueryService(config, this.connectors[config.connector], this.config.state);
 
-    const LDESClient = newEngine();
-    const eventstreamSync = LDESClient.createReadStream(orchestratorConfig.url, options);
+    await queryService.provision();
 
-    const orchestrator = new Orchestrator([connector], state, eventstreamSync);
+    this.queryServices[config.name] = queryService;
 
-    await orchestrator.provision();
-
-    this.orchestrators[orchestratorConfig.name] = orchestrator;
-    console.log(`Orchestrator ${orchestratorConfig.name} added.`);
+    console.log(`Query Service ${config.name} added.`);
   }
 
   public async provision(): Promise<void> {
-    const orchestratorConfigs = this.configuration.orchestrators;
+    const queryServices = this.config.queryServices;
 
-    await Promise.all(orchestratorConfigs.map(conf => this.addOrchestrator(conf)));
+    await Promise.all(queryServices.map(conf => this.addQueryService(conf)));
   }
 
   /**
-   * Start listening to events on all Orchestrators.
+   * Start listening to events for all QueryServices.
    */
   public async run(): Promise<void> {
-    await Promise.all(Object.values(this.orchestrators).map(orchestrator => orchestrator.run()));
+    await Promise.all(Object.values(this.queryServices).map(qs => qs.run()));
   }
 }
