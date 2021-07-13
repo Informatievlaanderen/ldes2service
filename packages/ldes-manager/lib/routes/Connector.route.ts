@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
-import { Connector } from '../../lib/models/Connector.model';
-import { Orchestrator } from '../../lib/models/Orchestrator.model';
-import sequelize from '../../orm/sequelize';
+import { Connector } from '../models/Connector.model';
+import { Orchestrator } from '../models/Orchestrator.model';
+import sequelize from '../../bin/orm/sequelize';
 
 interface connectorParams {
   id: number;

@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
-import ConnectorRoute from './routes/Connector.route';
-import OrchestratorRoute from './routes/Orchestrator.route';
+import ConnectorRoute from '../lib/routes/Connector.route';
+import OrchestratorRoute from '../lib/routes/Orchestrator.route';
 
 const port = process.env.PORT || 7000;
 const server: FastifyInstance = Fastify({});
