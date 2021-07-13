@@ -10,7 +10,9 @@
     "skipLibCheck": true,
     "strict": true,
     "strictFunctionTypes": false,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "packages/*/index.ts",
