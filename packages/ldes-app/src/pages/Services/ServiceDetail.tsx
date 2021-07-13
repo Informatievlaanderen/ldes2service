@@ -1,8 +1,9 @@
-import React from 'react';
-import { IConnectorService } from '../../../../ldes-types';
+import React, { useState } from 'react';
+import { IConfigTemplate, IConnectorService } from '../../../../ldes-types';
 import { H1, H2, H3 } from '../../components/Headings';
 import { Input, InputGroup, Label } from '../../components/Input';
 import { Td, Th, Tr } from '../../components/Table';
+import { TemplateConfigInput } from '../../components/TemplateConfigInput';
 
 type Props = {
   service: IConnectorService;
@@ -10,6 +11,21 @@ type Props = {
 
 export function ServiceDetail(props: Props) {
   const { service } = props;
+
+  const [serviceConfiguration, setServiceConfiguration] = useState({
+    connection_string: 'mongodb://localhost:27018',
+  });
+
+  const template: IConfigTemplate = {
+    name: '@ldes/ldes-mongodb-connector',
+    fields: [
+      {
+        name: 'connection_string',
+        validation: ['required', 'string'],
+        value: 'mongodb://localhost:27017',
+      },
+    ],
+  };
 
   return (
     <div>
@@ -19,6 +35,11 @@ export function ServiceDetail(props: Props) {
       </div>
       <div className="mt-8">
         <H3>Configuration</H3>
+        <TemplateConfigInput
+          template={template}
+          value={serviceConfiguration}
+          onChange={setServiceConfiguration}
+        />
         <InputGroup>
           <Label htmlFor="connection_string">Connection string</Label>
           <Input id="connection_string" value="mongodb://root:root@127.0.0.1:27017" />
