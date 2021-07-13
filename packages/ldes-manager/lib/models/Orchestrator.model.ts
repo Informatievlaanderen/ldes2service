@@ -10,6 +10,7 @@ import {
   DataType,
   Comment,
   ForeignKey,
+  IsUrl,
 } from 'sequelize-typescript';
 import { Connector } from './Connector.model';
 
@@ -19,6 +20,7 @@ export class Orchestrator extends Model {
   @Column(DataType.BIGINT)
   id: Number;
 
+  @IsUrl
   @AllowNull(false)
   @Column
   ldes_uri: String;

@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sequelize = void 0;
 require('dotenv').config();
 const sequelize_typescript_1 = require("sequelize-typescript");
+const Connector_model_1 = require("../lib/models/Connector.model");
+const Orchestrator_model_1 = require("../lib/models/Orchestrator.model");
 const connectionString = process.env.DATABASE_URL;
 console.debug('Connection string', connectionString);
-exports.sequelize = new sequelize_typescript_1.Sequelize(connectionString);
+const sequelize = new sequelize_typescript_1.Sequelize(connectionString, { repositoryMode: true });
+sequelize.addModels([Connector_model_1.Connector, Orchestrator_model_1.Orchestrator]);
+exports.default = sequelize;

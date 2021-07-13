@@ -31,7 +31,10 @@
     "@ldes/replicator": "^0.0.0",
     "@treecg/actor-init-ldes-client": "^2.3.2",
     "dotenv": "^10.0.0",
+    "fastify": "^3.19.1",
+    "fastify-plugin": "^3.0.0",
     "mysql2": "^2.2.5",
+    "pino": "^6.12.0",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.6.5",
     "sequelize-typescript": "^2.1.0"
