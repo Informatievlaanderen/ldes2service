@@ -4,18 +4,20 @@ import { Connector } from '../../lib/models/Connector.model';
 import { Orchestrator } from '../../lib/models/Orchestrator.model';
 import sequelize from '../../orm/sequelize';
 
-interface connectorParams {
+interface orchestratorParams {
   id: number;
 }
 
-const connectorRepository = sequelize.getRepository(Connector);
 const orchestratorRepository = sequelize.getRepository(Orchestrator);
 
-const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, options: FastifyPluginOptions) => {
-  server.get('/connectors', {}, async (request, reply) => {
+const OrchestratorRoute: FastifyPluginAsync = async (
+  server: FastifyInstance,
+  options: FastifyPluginOptions
+) => {
+  server.get('/orchestrator', {}, async (request, reply) => {
     try {
-      const connectors = await connectorRepository.findAll({ include: [orchestratorRepository] });
-      return reply.code(200).send(connectors);
+      const orchestrators = await orchestratorRepository.findAll();
+      return reply.code(200).send(orchestrators);
     } catch (error) {
       request.log.error(error);
       console.error(error);
@@ -23,17 +25,16 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
     }
   });
 
-  server.get<{ Params: connectorParams }>('/connectors/:id', {}, async (request, reply) => {
+  server.get<{ Params: orchestratorParams }>('/orchestrator/:id', {}, async (request, reply) => {
     try {
       const id = request.params.id;
-      const connector = await connectorRepository.findOne({
+      const orchestrator = await orchestratorRepository.findOne({
         where: { id: id },
-        include: [orchestratorRepository],
       });
-      if (!connector) {
-        return reply.code(404).send({ message: 'Connector not found' });
+      if (!orchestrator) {
+        return reply.code(404).send({ message: 'Orchestrator not found' });
       }
-      return reply.code(200).send(connector);
+      return reply.code(200).send(orchestrator);
     } catch (error) {
       request.log.error(error);
       console.error(error);
@@ -42,4 +43,4 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
   });
 };
 
-export default fp(ConnectorRoute);
+export default fp(OrchestratorRoute);
