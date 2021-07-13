@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { IConnectorService } from '../../../../ldes-types';
+import { AddServiceDialog } from '../../components/AddServiceDialog';
 import { H1, H2 } from '../../components/Headings';
 import { Td, Th, Tr } from '../../components/Table';
 
@@ -17,6 +18,9 @@ export function Services(props: Props) {
   return (
     <div>
       <H1>LDES2Service</H1>
+
+      <AddServiceDialog/>
+
       <div className="mt-6">
         <H2>
           LDES2Service is a set of NPM packages you can use to replicate an LDES in a back-end system of
