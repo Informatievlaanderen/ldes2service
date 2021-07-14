@@ -9,11 +9,13 @@ import {
   AllowNull,
   DataType,
   HasMany,
+  AutoIncrement,
 } from 'sequelize-typescript';
 import { Orchestrator } from './Orchestrator.model';
 
 @Table
 export class Connector extends Model {
+  @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
   id: Number;

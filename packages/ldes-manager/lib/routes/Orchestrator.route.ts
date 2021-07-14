@@ -8,6 +8,24 @@ interface orchestratorParams {
   id: number;
 }
 
+interface orchestratorAttrs {
+  ldes_uri: string;
+  name: string;
+  connectorId: number;
+  polling_interval: number;
+}
+
+const orchestratorBodyJsonSchema = {
+  type: 'object',
+  required: ['name', 'ldes_uri', 'connectorId', 'polling_interval'],
+  properties: {
+    name: { type: 'string' },
+    ldes_uri: { type: 'string' },
+    connectorId: { type: 'number' },
+    polling_interval: { type: 'number' },
+  },
+};
+
 const orchestratorRepository = sequelize.getRepository(Orchestrator);
 
 const OrchestratorRoute: FastifyPluginAsync = async (
@@ -25,7 +43,7 @@ const OrchestratorRoute: FastifyPluginAsync = async (
     }
   });
 
-  server.get<{ Params: orchestratorParams }>('/orchestrator/:id', {}, async (request, reply) => {
+  server.get<{ Params: orchestratorParams }>('/orchestrators/:id', {}, async (request, reply) => {
     try {
       const id = request.params.id;
       const orchestrator = await orchestratorRepository.findOne({
@@ -41,6 +59,29 @@ const OrchestratorRoute: FastifyPluginAsync = async (
       return reply.code(500).send({ message: 'Server error' });
     }
   });
+
+  server.post<{ Body: orchestratorAttrs }>(
+    '/orchestrators',
+    { schema: { body: orchestratorBodyJsonSchema } },
+    async (request, reply) => {
+      try {
+        const { name, ldes_uri, connectorId, polling_interval } = request.body;
+        await orchestratorRepository.create({
+          name,
+          ldes_uri,
+          connectorId,
+          polling_interval,
+          slug: name.replace(/\s+/g, '-').toLowerCase(),
+        });
+
+        reply.code(201).send({ message: 'Created' });
+      } catch (error) {
+        request.log.error(error);
+        console.error(error);
+        return reply.code(500).send({ message: 'Server error' });
+      }
+    }
+  );
 };
 
 export default fp(OrchestratorRoute);

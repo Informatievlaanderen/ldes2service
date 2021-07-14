@@ -11,11 +11,13 @@ import {
   Comment,
   ForeignKey,
   IsUrl,
+  AutoIncrement,
 } from 'sequelize-typescript';
 import { Connector } from './Connector.model';
 
 @Table
 export class Orchestrator extends Model {
+  @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
   id: Number;
