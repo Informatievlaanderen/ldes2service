@@ -19,7 +19,7 @@ export function Services(props: Props) {
     <div>
       <H1>LDES2Service</H1>
 
-      <AddServiceDialog/>
+      <AddServiceDialog />
 
       <div className="mt-6">
         <H2>
@@ -30,40 +30,54 @@ export function Services(props: Props) {
       </div>
       <div className="mt-8">
         <h3 className="font-bold text-lg">In the spotlight</h3>
-        <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2">
-          {servicesInTheSpotlight.map(service => (
-            <li key={service.id}>
-              <Link
-                to={`/services/${service.id}`}
-                className="bg-gray-50 border border-gray-400 rounded-sm w-full group text-left flex items-stretch p-4"
-              >
-                <div className="group-hover:underline text-xl font-medium text-blue-500">{service.name}</div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+
+        {status === 'loading' ? (
+          'loading'
+        ) : (
+          <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mt-2">
+            {servicesInTheSpotlight.map(service => (
+              <li key={service.id}>
+                <Link
+                  to={`/services/${service.id}`}
+                  className="bg-gray-50 border border-gray-400 rounded-sm w-full group text-left flex items-stretch p-4"
+                >
+                  <div className="group-hover:underline text-xl font-medium text-blue-500">
+                    {service.name}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="mt-8">
         <h3 className="font-bold text-lg">Overview</h3>
-        <table className="w-full mt-2">
-          <thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Image</Th>
-              <Th>Port</Th>
-            </Tr>
-          </thead>
-          <tbody>
-            {services.map(service => (
-              <Tr key={service.id} onClick={() => history.push(`/services/${service.id}`)}>
-                <Td>{service.name}</Td>
-                <Td>{service.image}</Td>
-                <Td>{service.configuration}</Td>
+
+        {status === 'loading' ? (
+          'loading'
+        ) : (
+          <table className="w-full mt-2">
+            <thead>
+              <Tr>
+                <Th>Name</Th>
+                <Th>Image</Th>
+                <Th>Type</Th>
+                <Th>Port</Th>
               </Tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {services.map(service => (
+                <Tr key={service.id} onClick={() => history.push(`/services/${service.id}`)}>
+                  <Td>{service.name}</Td>
+                  <Td>{service.image}</Td>
+                  <Td>{service.type}</Td>
+                  <Td>{service.port}</Td>
+                </Tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

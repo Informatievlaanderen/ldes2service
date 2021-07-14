@@ -1,6 +1,7 @@
 import type { IGeneratorPluginOptions } from '@ldes/types';
 import type { FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
+import FastifyCors from 'fastify-cors';
 import AvailableConnectorsRoute from '../lib/routes/AvailableConnectors.route';
 import ConnectorRoute from '../lib/routes/Connector.route';
 import GeneratorRoute from '../lib/routes/Generator.route';
@@ -15,6 +16,7 @@ const start = async (): Promise<void> => {
       server.register(ConnectorRoute),
       server.register(OrchestratorRoute),
       server.register(AvailableConnectorsRoute),
+      server.register(FastifyCors),
       server.register<IGeneratorPluginOptions>(GeneratorRoute, { setup: false, prefix: '/generator' }),
     ]);
     await server.listen(port);

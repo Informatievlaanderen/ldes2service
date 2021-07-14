@@ -66,8 +66,10 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
 
   server.post<{ Body: connectorAttrs }>(
     '/connectors',
-    { schema: { body: connectorBodyJsonSchema } },
+    //{ schema: { body: connectorBodyJsonSchema } },
     async (request, reply) => {
+      console.log(request.body);
+
       try {
         const { name, type, image, port, config } = request.body;
         await connectorRepository.create({

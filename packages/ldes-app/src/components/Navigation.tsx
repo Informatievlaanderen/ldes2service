@@ -12,11 +12,6 @@ export function Navigation() {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/ldes" activeClassName="underline">
-              LDES
-            </NavLink>
-          </li>
-          <li>
             <a href="https://github.com/osoc21/ldes2service" target="_blank" rel="noreferrer">
               GitHub
             </a>

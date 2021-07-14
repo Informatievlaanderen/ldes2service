@@ -8,9 +8,10 @@ export interface IConfigTemplate {
 
 export interface IFieldTemplate {
   name: string;
-  validation: IConfigTemplateFieldValidation[];
+  validation: string[];
   value?: string;
 }
+
 type IConfigTemplateFieldValidation = 'required' | 'string' | 'number';
 
 export type IConfigTemplates = IConfigTemplate[];
