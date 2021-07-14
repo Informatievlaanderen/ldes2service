@@ -7,9 +7,9 @@ import type { IState, IWritableConnector } from '@ldes/types';
 export class Orchestrator {
   private readonly connectors: IWritableConnector[];
   private readonly stateStore: IState;
-  private readonly ldes: Readable;
+  private readonly ldes: Readable[];
 
-  public constructor(connectors: IWritableConnector[], stateStore: IState, ldes: Readable) {
+  public constructor(connectors: IWritableConnector[], stateStore: IState, ldes: Readable[]) {
     this.connectors = connectors;
     this.stateStore = stateStore;
     this.ldes = ldes;
@@ -18,12 +18,16 @@ export class Orchestrator {
   /**
    * Start listening to the events and pipe them to the connectors
    */
-  public async run(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.ldes.on('readable', () => this.processData()).on('error', error => reject(error));
-
-      this.ldes.on('end', () => resolve());
-    });
+  public async run(): Promise<void[]> {
+    return Promise.all(
+      this.ldes.map(
+        ldes =>
+          new Promise<void>((resolve, reject) => {
+            ldes.on('readable', () => this.processData(ldes)).on('error', error => reject(error));
+            ldes.on('end', () => resolve());
+          })
+      )
+    );
   }
 
   public async provision(): Promise<void> {
@@ -40,14 +44,14 @@ export class Orchestrator {
     throw new Error('not implemented');
   }
 
-  protected async processData(): Promise<void> {
-    let member: string = this.ldes.read();
+  protected async processData(ldes: Readable): Promise<void> {
+    let member: string = ldes.read();
 
     while (member) {
       const copiedMember = member;
       await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
 
-      member = this.ldes.read();
+      member = ldes.read();
     }
   }
 }
