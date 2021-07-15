@@ -1,2 +1,2 @@
 export * from './lib/MongoDBConnector';
-export * from './template';
+export * from './lib/template';
