@@ -12,7 +12,7 @@ interface orchestratorParams {
 interface orchestratorAttrs {
   ldes_uri: string;
   name: string;
-  connectorId: number;
+  connector_id: number;
   polling_interval: number;
 }
 
@@ -22,7 +22,7 @@ const orchestratorBodyJsonSchema = {
   properties: {
     name: { type: 'string' },
     ldes_uri: { type: 'string' },
-    connectorId: { type: 'number' },
+    connector_id: { type: 'number' },
     polling_interval: { type: 'number' },
   },
 };
@@ -68,10 +68,10 @@ const OrchestratorRoute: FastifyPluginAsync = async (
     { schema: { body: orchestratorBodyJsonSchema } },
     async (request, reply) => {
       try {
-        const { name, ldes_uri, connectorId, polling_interval } = request.body;
+        const { name, ldes_uri, connector_id, polling_interval } = request.body;
 
         const connector = await connectorRepository.findOne({
-          where: { id: connectorId },
+          where: { id: connector_id },
         });
 
         if (connector) {
