@@ -101,6 +101,39 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
       return reply.code(500).send({ message: 'Server error' });
     }
   });
+
+  server.put<{ Body: connectorAttrs; Params: connectorParams }>(
+    '/connectors/:id',
+    { schema: { body: connectorBodyJsonSchema } },
+    async (request, reply) => {
+      try {
+        const { name, type, image, port, config } = request.body;
+        const id = request.params.id;
+
+        const connector = await connectorRepository.findOne({
+          where: { id: id },
+        });
+
+        if (connector) {
+          await connector.update({
+            name,
+            type,
+            image,
+            port,
+            config,
+          });
+        } else {
+          return reply.code(400).send({ message: 'Connector not found' });
+        }
+
+        return reply.code(200).send({ message: 'Updated' });
+      } catch (error) {
+        request.log.error(error);
+        console.error(error);
+        return reply.code(500).send({ message: 'Server error' });
+      }
+    }
+  );
 };
 
 export default fp(ConnectorRoute);
