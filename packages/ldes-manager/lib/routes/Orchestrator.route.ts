@@ -3,6 +3,7 @@ import fp from 'fastify-plugin';
 import { Connector } from '../models/Connector.model';
 import { Orchestrator } from '../models/Orchestrator.model';
 import sequelize from '../../bin/orm/sequelize';
+import { ConnectorOrchestrator } from '../models/ConnectorOrchestrator.model';
 
 interface orchestratorParams {
   id: number;
@@ -27,6 +28,8 @@ const orchestratorBodyJsonSchema = {
 };
 
 const orchestratorRepository = sequelize.getRepository(Orchestrator);
+const connectorRepository = sequelize.getRepository(Connector);
+const connectorOrchestratorRepository = sequelize.getRepository(ConnectorOrchestrator);
 
 const OrchestratorRoute: FastifyPluginAsync = async (
   server: FastifyInstance,
@@ -66,15 +69,28 @@ const OrchestratorRoute: FastifyPluginAsync = async (
     async (request, reply) => {
       try {
         const { name, ldes_uri, connectorId, polling_interval } = request.body;
-        await orchestratorRepository.create({
-          name,
-          ldes_uri,
-          connectorId,
-          polling_interval,
-          slug: name.replace(/\s+/g, '-').toLowerCase(),
+
+        const connector = await connectorRepository.findOne({
+          where: { id: connectorId },
         });
 
-        reply.code(201).send({ message: 'Created' });
+        if (connector) {
+          const orchestrator = await orchestratorRepository.create({
+            name,
+            ldes_uri,
+            polling_interval,
+            slug: name.replace(/\s+/g, '-').toLowerCase(),
+          });
+
+          await connectorOrchestratorRepository.create({
+            connectorId: connector.id,
+            orchestratorId: orchestrator.id,
+          });
+        } else {
+          return reply.code(400).send({ message: 'Connector not found' });
+        }
+
+        return reply.code(201).send({ message: 'Created' });
       } catch (error) {
         request.log.error(error);
         console.error(error);

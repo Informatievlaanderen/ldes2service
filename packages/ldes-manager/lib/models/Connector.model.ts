@@ -10,7 +10,9 @@ import {
   DataType,
   HasMany,
   AutoIncrement,
+  BelongsToMany,
 } from 'sequelize-typescript';
+import { ConnectorOrchestrator } from './ConnectorOrchestrator.model';
 import { Orchestrator } from './Orchestrator.model';
 
 @Table
@@ -27,6 +29,10 @@ export class Connector extends Model {
 
   @AllowNull(false)
   @Column
+  image: String;
+
+  @AllowNull(false)
+  @Column
   type: String;
 
   @Unique
@@ -38,7 +44,7 @@ export class Connector extends Model {
   @Column(DataType.JSON)
   config: JSON;
 
-  @HasMany(() => Orchestrator)
+  @BelongsToMany(() => Orchestrator, () => ConnectorOrchestrator)
   orchestrators: Orchestrator[];
 
   @CreatedAt
