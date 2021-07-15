@@ -86,6 +86,21 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
       }
     }
   );
+
+  server.delete<{ Params: connectorParams }>('/connectors/:id', {}, async (request, reply) => {
+    try {
+      const id = request.params.id;
+      await connectorRepository.destroy({
+        where: { id: id },
+      });
+
+      return reply.code(200).send({ message: 'Deleted' });
+    } catch (error) {
+      request.log.error(error);
+      console.error(error);
+      return reply.code(500).send({ message: 'Server error' });
+    }
+  });
 };
 
 export default fp(ConnectorRoute);

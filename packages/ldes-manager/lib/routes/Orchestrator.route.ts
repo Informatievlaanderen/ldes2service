@@ -35,7 +35,7 @@ const OrchestratorRoute: FastifyPluginAsync = async (
   server: FastifyInstance,
   options: FastifyPluginOptions
 ) => {
-  server.get('/orchestrator', {}, async (request, reply) => {
+  server.get('/orchestrators', {}, async (request, reply) => {
     try {
       const orchestrators = await orchestratorRepository.findAll();
       return reply.code(200).send(orchestrators);
@@ -98,6 +98,20 @@ const OrchestratorRoute: FastifyPluginAsync = async (
       }
     }
   );
+
+  server.delete<{ Params: orchestratorParams }>('/orchestrators/:id', {}, async (request, reply) => {
+    try {
+      const id = request.params.id;
+      await orchestratorRepository.destroy({
+        where: { id: id },
+      });
+      return reply.code(200).send({ message: 'Deleted' });
+    } catch (error) {
+      request.log.error(error);
+      console.error(error);
+      return reply.code(500).send({ message: 'Server error' });
+    }
+  });
 };
 
 export default fp(OrchestratorRoute);

@@ -1,5 +1,6 @@
 export interface IConfigTemplate {
   name: string;
+  image: string;
   fields: Array<IFieldTemplate>;
 }
 
