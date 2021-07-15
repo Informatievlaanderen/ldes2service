@@ -26,7 +26,7 @@ export class QueryService {
     const LDESClient = newEngine();
     const eventstreamSync = LDESClient.createReadStream(config.url, options);
 
-    const orchestrator = new Orchestrator([this.connector], state, eventstreamSync);
+    const orchestrator = new Orchestrator([this.connector], state, [eventstreamSync]);
 
     await orchestrator.provision();
 
