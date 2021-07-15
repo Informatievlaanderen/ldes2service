@@ -6,7 +6,6 @@ import { RedisState } from '@ldes/ldes-redis-state';
 
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import { Orchestrator } from '../lib/Orchestrator';
-import { IWritableConnector } from '../../ldes-types';
 
 // TODO: Parse and use CLI parameters
 
@@ -28,13 +27,12 @@ async function run(): Promise<void> {
 
   const connectors = CONNECTORS.map((con: string) => {
     const config = JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}');
-    const name = process.env[`CONNECTOR_${con}_NAME`];
 
     const Connector = require(process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector');
     const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
 
     if (!connectorName) {
-      throw new Error(`The connector ${name} couldn't be loaded correctly!`);
+      throw new Error(`The connector ${con} couldn't be loaded correctly!`);
     }
 
     return new Connector[connectorName](config);
