@@ -19,19 +19,20 @@ export class PostgresConnector implements IWritableConnector {
    * Templates for the backend generator.
    */
   public static composeTemplate = `
-postgres: 
-  image: postgres
+{hostname}: 
+  image: bitnami/postgresql
   restart: always
   environment:
     POSTGRES_USER: {username}
     POSTGRES_PASSWORD: {password}
     POSTGRES_DB: {database}
+    POSTGRES_PORT_NUMBER: {port}
   ports:
-    - "{port}:5432"
+    - "{port}:{port}"
     `;
 
   public static helmTemplate = `
-name: postgres
+name: {hostname}
 chart: bitnami/postgresql
 namespace: ldes
 createNamespace: true
