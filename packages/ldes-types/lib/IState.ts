@@ -19,5 +19,5 @@ export interface IState {
   /**
    * Return all processed pages
    */
-  getProcessedPaged: () => Promise<Url[]>;
+  getProcessedPages: () => Promise<Url[]>;
 }

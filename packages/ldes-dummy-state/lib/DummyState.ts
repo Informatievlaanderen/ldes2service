@@ -20,7 +20,7 @@ export class DummyState implements IState {
     this.pages.push(page);
   }
 
-  public async getProcessedPaged(): Promise<Url[]> {
+  public async getProcessedPages(): Promise<Url[]> {
     return this.pages;
   }
 

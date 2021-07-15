@@ -16,3 +16,9 @@ postgres:
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   ports:
     - 5432:5432
+
+redis:
+  image: redis:6
+  command: redis-server --appendonly yes
+  ports:
+    - 6379:6379
