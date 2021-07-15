@@ -56,24 +56,26 @@ fastify.post(
     schema: {
       body: {
         type: 'object',
-        required: ['services'],
+        required: ['services', 'type'],
         properties: {
           services: {
             type: 'object',
           },
           type: { type: 'string' },
+          replicator: {
+            type: 'object',
+          },
         },
       },
     },
   },
   async (_request: any, _reply: any) => {
-    const serviceNames = Object.keys(_request.body.services);
     switch (_request.body.type) {
       case 'helm':
-        _reply.send(helmFileGenerator.generate(serviceNames, _request.body.services));
+        _reply.send(helmFileGenerator.generate(_request.body.services));
         break;
       case 'compose':
-        _reply.send(dockerComposeGenerator.generate(serviceNames, _request.body.services));
+        _reply.send(dockerComposeGenerator.generate(_request.body.services, _request.body.replicator));
         break;
       default:
         _reply.send('No file type was selected!');
