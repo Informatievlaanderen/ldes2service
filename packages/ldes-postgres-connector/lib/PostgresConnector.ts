@@ -2,12 +2,47 @@ import type { IWritableConnector, IConfigConnector } from '@ldes/types';
 import type { PoolClient } from 'pg';
 import { Pool } from 'pg';
 
+export interface IConfigPostgresConnector extends IConfigConnector {
+  username: string;
+  hostname: string;
+  database: string;
+  password: string;
+  port: number;
+}
+
 export class PostgresConnector implements IWritableConnector {
-  private readonly config: IConfigConnector;
+  private readonly config: IConfigPostgresConnector;
   private pool: Pool;
   private poolClient: PoolClient;
 
-  public constructor(config: IConfigConnector) {
+  /**
+   * Templates for the backend generator.
+   */
+  public static composeTemplate = `
+postgres: 
+  image: postgres
+  restart: always
+  environment:
+    POSTGRES_USER: {username}
+    POSTGRES_PASSWORD: {password}
+    POSTGRES_DB: {database}
+  ports:
+    - "{port}:5432"
+    `;
+
+  public static helmTemplate = `
+name: postgres
+chart: bitnami/postgresql
+namespace: ldes
+createNamespace: true
+values:
+  - postgresqlUsername: "{username}"
+  - postgresqlPassword: "{password}"
+  - postgresqlDatabase: "{database}"
+  - service.nodePort: "{port}"
+    `;
+
+  public constructor(config: IConfigPostgresConnector) {
     this.config = config;
   }
 
@@ -30,7 +65,7 @@ export class PostgresConnector implements IWritableConnector {
       data: member,
     };
 
-    const query = `INSERT INTO ldes(id, generated_at, type, is_version_of, data) 
+    const query = `INSERT INTO "${this.config.databaseName}" (id, generated_at, type, is_version_of, data) 
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT ("id") DO NOTHING;`;
 
@@ -44,7 +79,7 @@ export class PostgresConnector implements IWritableConnector {
 
     if (this.config.amountOfVersions > 0) {
       const { rows: results } = await this.poolClient.query(
-        `SELECT * FROM ${this.config.databaseName} WHERE is_version_of = $1 ORDER BY generated_at ASC`,
+        `SELECT * FROM "${this.config.databaseName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
         [memberObject.is_version_of]
       );
 
@@ -54,7 +89,7 @@ export class PostgresConnector implements IWritableConnector {
         const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
 
         await this.pool.query(
-          `DELETE FROM ${this.config.databaseName} WHERE id IN (${idsToRemove.join(', ')})`
+          `DELETE FROM "${this.config.databaseName}" WHERE id IN (${idsToRemove.join(', ')})`
         );
       }
     }
@@ -71,16 +106,16 @@ export class PostgresConnector implements IWritableConnector {
    */
   public async provision(): Promise<void> {
     this.pool = new Pool({
-      user: process.env.POSTGRES_USER || 'postgres',
-      host: process.env.POSTGRES_HOST || 'localhost',
-      database: process.env.POSTGRES_NAME || 'postgres',
-      password: process.env.POSTGRES_PASSWORD,
-      port: Number.parseInt(process.env.POSTGRES_PORT || '5432', 10),
+      user: this.config.username,
+      host: this.config.hostname,
+      database: this.config.database,
+      password: this.config.password,
+      port: this.config.port,
     });
 
     this.poolClient = await this.pool.connect();
 
-    await this.pool.query(`CREATE TABLE IF NOT EXISTS ${this.config.databaseName}
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.databaseName}"
         (id TEXT PRIMARY KEY,
         type TEXT NOT NULL,
         is_version_of TEXT,
