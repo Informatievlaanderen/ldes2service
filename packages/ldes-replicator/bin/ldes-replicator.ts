@@ -2,32 +2,21 @@
  * CLI interface where manual dependency injection happens
  */
 
-import { PostgresConnector } from '@ldes/ldes-postgres-connector';
 import { RedisState } from '@ldes/ldes-redis-state';
 
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import { Orchestrator } from '../lib/Orchestrator';
+import { IWritableConnector } from '../../ldes-types';
 
 // TODO: Parse and use CLI parameters
 
 const URLS = process.env.URLS;
+const STATE_CONFIG = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}');
+const CONNECTORS = JSON.parse(process.env.CONNECTORS || '[]');
 const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10);
 
 async function run(): Promise<void> {
-  const config = {
-    amountOfVersions: 0,
-    databaseName: 'ldes',
-    username: process.env.POSTGRES_USERNAME ?? 'postgres',
-    password: process.env.POSTGRES_PASSWORD ?? 'postgres',
-    database: process.env.POSTGRES_DATABASE ?? 'postgres',
-    hostname: process.env.POSTGRES_HOSTNAME ?? '127.0.0.1',
-    port: Number.parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
-  };
-
-  const connector = new PostgresConnector(config);
-  const state = new RedisState({
-    id: 'replicator',
-  });
+  const state = new RedisState(STATE_CONFIG);
 
   const options = {
     pollingInterval: POLL_INTERVAL,
@@ -37,11 +26,25 @@ async function run(): Promise<void> {
     throw new Error('No LDES URLs specified. Have you added the URL environment variable?');
   }
 
+  const connectors = CONNECTORS.map((con: string) => {
+    const config = JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}');
+    const name = process.env[`CONNECTOR_${con}_NAME`];
+
+    const Connector = require(process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector');
+    const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
+
+    if (!connectorName) {
+      throw new Error(`The connector ${name} couldn't be loaded correctly!`);
+    }
+
+    return new Connector[connectorName](config);
+  });
+
   const LDESClient = newEngine();
 
   const streams = URLS.split(',').map(url => LDESClient.createReadStream(url, options));
 
-  const orchestrator = new Orchestrator([connector], state, streams);
+  const orchestrator = new Orchestrator(connectors, state, streams);
 
   await orchestrator.provision();
   await orchestrator.run();
