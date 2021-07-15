@@ -1,4 +1,6 @@
-export const template = {
+import type { IConfigTemplate } from '@ldes/types';
+
+export const template: IConfigTemplate = {
   name: 'postgres-db-connector',
   fields: [
     {
