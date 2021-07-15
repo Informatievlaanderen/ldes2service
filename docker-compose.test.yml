@@ -9,7 +9,7 @@ mongo:
     - 27017:27017
 
 postgres:
-  image: postgres:13
+  image: postgres:13-alpine
   environment:
     POSTGRES_DB: ${POSTGRES_DB}
     POSTGRES_USER: ${POSTGRES_USER}
