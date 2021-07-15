@@ -1,12 +1,17 @@
-const { MongoDBConnector } = require('../..');
+const { MongoDbConnector } = require('../..');
 
 describe('ldes-mongodb-connector', () => {
   let connector;
 
   beforeEach(async () => {
-    connector = new MongoDBConnector({
+    connector = new MongoDbConnector({
       amountOfVersions: 2,
       databaseName: 'ldes',
+      username: 'mongo',
+      password: 'mongo',
+      database: 'ldes',
+      hostname: 'localhost',
+      port: 27017
     });
 
     await connector.provision();
