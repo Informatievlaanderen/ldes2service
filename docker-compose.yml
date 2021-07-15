@@ -12,7 +12,7 @@ services:
       - 27017:27017
 
   postgres:
-    image: postgres:13-alpine
+    image: 'bitnami/postgresql'
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -28,13 +28,12 @@ services:
 
   replicator:
     build: .
-    image: ldes
+    image: ghcr.io/osoc21/ldes-replicator
     environment:
       URLS: https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/objecten
       STATE_CONFIG: '{"id":"replicator_0",
         "host":"redis",
-        "port":6379,
-        "password":""}'
+        "port":6379}'
       POLL_INTERVAL: 5000
       CONNECTORS: '[0,1]'
       CONNECTOR_0_NAME: postgres
