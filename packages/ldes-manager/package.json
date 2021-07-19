@@ -24,12 +24,9 @@
   },
   "dependencies": {
     "@comunica/core": "~1.19.2",
-    "@ldes/ldes-dummy-connector": "^0.0.0",
-    "@ldes/ldes-dummy-state": "^0.0.0",
+    "@ldes/generator-rest-api": "^0.0.0",
     "@ldes/ldes-mongodb-connector": "^0.0.0",
     "@ldes/ldes-postgres-connector": "^0.0.0",
-    "@ldes/replicator": "^0.0.0",
-    "@treecg/actor-init-ldes-client": "^2.3.2",
     "dotenv": "^10.0.0",
     "fastify": "^3.19.1",
     "fastify-plugin": "^3.0.0",
