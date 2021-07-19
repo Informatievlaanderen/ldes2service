@@ -1,4 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify';
+import AvailableConnectorsRoute from '../lib/routes/AvailableConnectors.route';
 import ConnectorRoute from '../lib/routes/Connector.route';
 import OrchestratorRoute from '../lib/routes/Orchestrator.route';
 
@@ -7,6 +8,7 @@ const server: FastifyInstance = Fastify({});
 
 server.register(ConnectorRoute);
 server.register(OrchestratorRoute);
+server.register(AvailableConnectorsRoute);
 
 const start = async () => {
   try {

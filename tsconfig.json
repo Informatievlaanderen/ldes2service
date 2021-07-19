@@ -19,7 +19,7 @@
     "packages/*/index-browser.ts",
     "packages/*/bin/**/*",
     "packages/*/lib/**/*",
-    "packages/ldes-manager/bin/orm"
+    "packages/*/template.ts"
   ],
   "exclude": ["**/node_modules", "**/test/*"]
 }

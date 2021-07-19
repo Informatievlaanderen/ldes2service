@@ -11,11 +11,15 @@ import {
   Comment,
   ForeignKey,
   IsUrl,
+  AutoIncrement,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Connector } from './Connector.model';
+import { ConnectorOrchestrator } from './ConnectorOrchestrator.model';
 
 @Table
 export class Orchestrator extends Model {
+  @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
   id: Number;
@@ -39,10 +43,8 @@ export class Orchestrator extends Model {
   @Column
   slug: String;
 
-  @AllowNull(false)
-  @ForeignKey(() => Connector)
-  @Column(DataType.BIGINT)
-  connectorId: Number;
+  @BelongsToMany(() => Connector, () => ConnectorOrchestrator)
+  connectors: Connector[];
 
   @CreatedAt
   createdAt: Date;

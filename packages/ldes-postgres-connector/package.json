@@ -13,7 +13,8 @@
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "index.d.ts",
-    "index.js"
+    "index.js",
+    "template.js"
   ],
   "repository": {
     "type": "git",

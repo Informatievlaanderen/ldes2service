@@ -3,7 +3,9 @@
 **/test/**/*.js
 **/bin/**/*.js
 **/index.js
+**/template.js
 .vscode
 lerna-debug.log
 .eslintcache
 .env
+
