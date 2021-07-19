@@ -19,19 +19,20 @@ export class MongoDbConnector implements IWritableConnector {
    * Templates for the backend generator.
    */
   public static composeTemplate = `
-mongo:
+{hostname}:
   image: bitnami/mongodb
   restart: always
   environment:
     MONGODB_USERNAME: {username}
     MONGODB_PASSWORD: {password}
     MONGODB_DATABASE: {database}
+    MONGODB_PORT_NUMBER: {port}
   ports:
-    - "{port}:27017"
+    - "{port}:{port}"
   `;
 
   public static helmTemplate = `
-name: mongo
+name: {hostname}
 chart: bitnami/mongodb
 namespace: ldes
 createNamespace: true

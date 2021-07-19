@@ -15,15 +15,15 @@ export class HelmFileGenerator {
     this.options = options;
   }
 
-  public generate(services: string[], settings: Record<string, any>): string {
+  public generate(services: Record<string, any>): string {
     const HelmFile: IHelmFile = {
       repositories: [{ name: 'bitnami', url: 'https://charts.bitnami.com/bitnami' }],
       releases: [],
     };
 
     for (const service of this.options) {
-      if (services.includes(service.id)) {
-        const formattedService = parse(format(service.helmTemplate, settings[service.id]));
+      if (Object.keys(services).includes(service.id)) {
+        const formattedService = parse(format(service.helmTemplate, services[service.id].settings));
 
         HelmFile.releases.push(formattedService);
       }

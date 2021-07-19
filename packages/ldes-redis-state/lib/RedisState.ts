@@ -39,7 +39,7 @@ export class RedisState implements IState {
     this.client = createNodeRedisClient({
       host: this.settings.host ?? '127.0.0.1',
       port: this.settings.port ?? 6_379,
-      password: this.settings.password,
+      password: this.settings.password ?? '',
     });
   }
 
