@@ -1,30 +1,10 @@
 import { DockerComposeGenerator } from '@ldes/docker-compose-generator';
 import { HelmFileGenerator } from '@ldes/helm-file-generator';
-import { MongoDbConnector } from '@ldes/ldes-mongodb-connector';
-import { PostgresConnector } from '@ldes/ldes-postgres-connector';
-import type { IGeneratorApiSetup } from '@ldes/types';
 
 const fastify = require('fastify')({ logger: true });
 
 const dockerComposeGenerator = new DockerComposeGenerator();
 const helmFileGenerator = new HelmFileGenerator();
-
-/* We will use the default connectors until this is connected to the manager  */
-const setup: IGeneratorApiSetup[] = [
-  {
-    id: 'postgres',
-    helmTemplate: PostgresConnector.helmTemplate,
-    composeTemplate: PostgresConnector.composeTemplate,
-  },
-  {
-    id: 'mongodb',
-    helmTemplate: MongoDbConnector.helmTemplate,
-    composeTemplate: MongoDbConnector.composeTemplate,
-  },
-];
-
-helmFileGenerator.setup(setup);
-dockerComposeGenerator.setup(setup);
 
 fastify.post(
   '/setup',
