@@ -36,7 +36,7 @@ const GeneratorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
     { schema: { body: generatorBodyJsonSchema } },
     async (request, reply) => {
       try {
-        const result = await got.post(`http://${GENERATOR}/create`, {
+        const result = await got.post(`http://${GENERATOR}/generator`, {
           json: request.body,
         });
 
