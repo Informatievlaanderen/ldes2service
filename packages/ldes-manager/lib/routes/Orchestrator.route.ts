@@ -1,9 +1,9 @@
-import { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
-import { Connector } from '../models/Connector.model';
-import { Orchestrator } from '../models/Orchestrator.model';
 import sequelize from '../../bin/orm/sequelize';
+import { Connector } from '../models/Connector.model';
 import { ConnectorOrchestrator } from '../models/ConnectorOrchestrator.model';
+import { Orchestrator } from '../models/Orchestrator.model';
 
 interface orchestratorParams {
   id: number;
@@ -66,7 +66,7 @@ const OrchestratorRoute: FastifyPluginAsync = async (
     try {
       const id = request.params.id;
       const orchestrator = await orchestratorRepository.findOne({
-        where: { id: id },
+        where: { id },
       });
       if (!orchestrator) {
         return reply.code(404).send({ message: 'Orchestrator not found' });
@@ -119,7 +119,7 @@ const OrchestratorRoute: FastifyPluginAsync = async (
     try {
       const id = request.params.id;
       await orchestratorRepository.destroy({
-        where: { id: id },
+        where: { id },
       });
       return reply.code(200).send({ message: 'Deleted' });
     } catch (error) {
@@ -138,7 +138,7 @@ const OrchestratorRoute: FastifyPluginAsync = async (
         const id = request.params.id;
 
         const orchestrator = await orchestratorRepository.findOne({
-          where: { id: id },
+          where: { id },
         });
 
         if (orchestrator) {

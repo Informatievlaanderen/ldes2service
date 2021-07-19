@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
-import fp from 'fastify-plugin';
 import { template as mongoTemplate } from '@ldes/ldes-mongodb-connector';
 import { template as postgresTemplate } from '@ldes/ldes-postgres-connector';
+import type { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
+import fp from 'fastify-plugin';
 
 const AvailableConnectorsRoute: FastifyPluginAsync = async (
   server: FastifyInstance,
