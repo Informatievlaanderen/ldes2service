@@ -3,3 +3,8 @@ export interface IGeneratorApiSetup {
   helmTemplate: string;
   composeTemplate: string;
 }
+
+export interface IGeneratorPluginOptions {
+  setup: boolean;
+  prefix?: string;
+}

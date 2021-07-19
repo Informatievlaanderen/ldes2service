@@ -1,38 +1,50 @@
-import type { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { DockerComposeGenerator } from '../../docker-compose-generator';
 import { HelmFileGenerator } from '../../helm-file-generator';
+import type { IGeneratorApiSetup, IGeneratorPluginOptions } from '../../ldes-types';
 
 const dockerComposeGenerator = new DockerComposeGenerator();
 const helmFileGenerator = new HelmFileGenerator();
 
-const GeneratorRoute: FastifyPluginAsync = async (server: FastifyInstance, options: FastifyPluginOptions) => {
-  server.post(
-    '/setup',
-    {
-      schema: {
-        body: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              helmTemplate: { type: 'string' },
-              composeTemplate: { type: 'string' },
+export function generatorSetup(body: IGeneratorApiSetup[]): void {
+  dockerComposeGenerator.setup(body);
+  helmFileGenerator.setup(body);
+}
+
+const GeneratorRoute: FastifyPluginAsync = async (
+  server: FastifyInstance,
+  options: IGeneratorPluginOptions
+) => {
+  const prefix = options.prefix?.replace(/\/$/gu, '') || '';
+
+  if (options.setup) {
+    server.post(
+      `${prefix}/setup`,
+      {
+        schema: {
+          body: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                helmTemplate: { type: 'string' },
+                composeTemplate: { type: 'string' },
+              },
             },
           },
         },
       },
-    },
-    async (_request: any, _reply: any) => {
-      dockerComposeGenerator.setup(_request.body);
-      helmFileGenerator.setup(_request.body);
-      _reply.send('Generators updated.');
-    }
-  );
+      async (_request: any, _reply: any) => {
+        generatorSetup(_request.body);
+        _reply.send('Generators updated.');
+      }
+    );
+  }
 
   server.post(
-    '/generator',
+    `${prefix}/create`,
     {
       schema: {
         body: {

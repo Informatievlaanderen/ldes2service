@@ -9,7 +9,7 @@ interface IHelmFile {
 }
 
 export class HelmFileGenerator {
-  private options: IGeneratorApiSetup[];
+  private options: IGeneratorApiSetup[] = [];
 
   public setup(options: IGeneratorApiSetup[]): void {
     this.options = options;

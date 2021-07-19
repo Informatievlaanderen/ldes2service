@@ -10,7 +10,7 @@ interface IComposeFile {
 }
 
 export class DockerComposeGenerator {
-  private options: IGeneratorApiSetup[];
+  private options: IGeneratorApiSetup[] = [];
 
   public setup(options: IGeneratorApiSetup[]): void {
     this.options = options;
