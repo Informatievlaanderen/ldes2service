@@ -12,6 +12,8 @@ export interface IConfigPostgresConnector extends IConfigConnector {
 
 export class PostgresConnector implements IWritableConnector {
   private readonly config: IConfigPostgresConnector;
+  // TODO: set the type
+  private shape?: any;
   private pool: Pool;
   private poolClient: PoolClient;
 
@@ -45,6 +47,10 @@ values:
 
   public constructor(config: IConfigPostgresConnector) {
     this.config = config;
+  }
+
+  public setShape(shape?: any) {
+    this.shape = shape;
   }
 
   /**

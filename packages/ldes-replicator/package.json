@@ -19,21 +19,21 @@
     "type": "git",
     "url": "git+https://github.com/Informatievlaanderen/ldes2service.git"
   },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
-    "start": "node -r dotenv/config ./bin/ldes-replicator.js"
-  },
   "bugs": {
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
-  "devDependencies": {
-    "@ldes/types": "^0.0.0"
-  },
   "dependencies": {
     "@comunica/core": "~1.19.2",
-    "@ldes/ldes-redis-state": "^0.0.0",
-    "@ldes/types": "^0.0.0",
     "@treecg/actor-init-ldes-client": "^2.3.2",
-    "dotenv": "^10.0.0"
+    "@types/node-fetch": "^2.5.11",
+    "dotenv": "^10.0.0",
+    "node-fetch": "^2.6.1",
+    "rdf-dereference": "^1.8.0",
+    "rdf-store-stream": "^1.2.0",
+    "slugify": "^1.6.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "start": "node -r dotenv/config ./bin/ldes-replicator.js"
   }
 }

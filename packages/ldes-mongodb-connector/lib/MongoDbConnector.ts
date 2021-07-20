@@ -1,6 +1,8 @@
 import type { IWritableConnector, IConfigConnector } from '@ldes/types';
 import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
+import fetch from 'node-fetch';
+import rdfDereferencer from 'rdf-dereference';
 
 export interface IConfigMongoDbConnector extends IConfigConnector {
   username: string;
@@ -48,12 +50,26 @@ values:
     this.config = config;
   }
 
+  public setShape(shape?: any) {}
+
   /**
    * Writes a version to the corresponding backend system
    * @param member
    */
   public async writeVersion(member: any): Promise<void> {
     const JSONmember = JSON.parse(member);
+
+    // console.log("Member", JSONmember);
+
+    fetch(JSONmember['@id'])
+      .then(res => res.json())
+      .then(async json => {
+        const { quads } = await rdfDereferencer.dereference(json['shacl']['shape']);
+        quads
+          .on('data', quad => console.log('data :', quad))
+          .on('error', error => console.error(error))
+          .on('end', () => console.log('All done!'));
+      });
 
     // This needs to become more generic:
     // @see https://github.com/osoc21/ldes2service/issues/20
@@ -109,7 +125,8 @@ values:
   private getURI(): string {
     const config = this.config;
 
-    return `mongodb://${config.username}:${config.password}@${config.hostname}:${config.port}/${config.database}`;
+    //return `mongodb://${config.username}:${config.password}@${config.hostname}:${config.port}/${config.database}`;
+    return 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false';
   }
 
   /**

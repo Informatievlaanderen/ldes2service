@@ -1,5 +1,11 @@
 export interface IWritableConnector {
   /**
+   * Sets the shape to the connector
+   * @param member
+   */
+  setShape: (shape?: any) => void;
+
+  /**
    * Writes a version to the corresponding backend system
    * @param member
    */

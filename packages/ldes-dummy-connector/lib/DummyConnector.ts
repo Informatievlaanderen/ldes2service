@@ -14,6 +14,8 @@ export class DummyConnector implements IWritableConnector {
     this.members = [];
   }
 
+  public setShape(shape?: any): void {}
+
   /**
    * Writes a version to the corresponding backend system
    * @param member

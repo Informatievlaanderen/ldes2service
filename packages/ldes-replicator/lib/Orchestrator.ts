@@ -1,15 +1,33 @@
 import type { Readable } from 'stream';
 import type { IState, IWritableConnector } from '@ldes/types';
 
+export type LdesShapeField = {
+  path: string;
+  datatype: string;
+  minCount?: number;
+  maxCount?: number;
+};
+
+export type LdesShape = LdesShapeField[];
+
+export type LdesObjects = {
+  [k: string]: {
+    url: string;
+    name: string;
+    stream: Readable;
+    shape: LdesShape;
+  };
+};
+
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
  */
 export class Orchestrator {
   private readonly connectors: IWritableConnector[];
   private readonly stateStore: IState;
-  private readonly ldes: Readable[];
+  private readonly ldes: LdesObjects;
 
-  public constructor(connectors: IWritableConnector[], stateStore: IState, ldes: Readable[]) {
+  public constructor(connectors: IWritableConnector[], stateStore: IState, ldes: LdesObjects) {
     this.connectors = connectors;
     this.stateStore = stateStore;
     this.ldes = ldes;
@@ -20,11 +38,18 @@ export class Orchestrator {
    */
   public async run(): Promise<void[]> {
     return Promise.all(
-      this.ldes.map(
+      Object.values(this.ldes).map(
         ldes =>
           new Promise<void>((resolve, reject) => {
-            ldes.on('readable', () => this.processData(ldes)).on('error', error => reject(error));
-            ldes.on('end', () => resolve());
+            ldes.stream
+              .on('readable', () => {
+                console.log({ clement: ldes });
+
+                this.processData(ldes.stream);
+              })
+              .on('error', error => reject(error));
+
+            ldes.stream.on('end', () => resolve());
           })
       )
     );
@@ -45,13 +70,11 @@ export class Orchestrator {
   }
 
   protected async processData(ldes: Readable): Promise<void> {
-    let member: string = ldes.read();
-
-    while (member) {
-      const copiedMember = member;
-      await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
-
-      member = ldes.read();
-    }
+    // let member: string = ldes.read();
+    // while (member) {
+    //   const copiedMember = member;
+    //   await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
+    //   member = ldes.read();
+    // }
   }
 }
