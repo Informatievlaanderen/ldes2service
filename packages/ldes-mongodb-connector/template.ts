@@ -1,7 +1,7 @@
 import type { IConfigTemplate } from '@ldes/types';
 
 export const template: IConfigTemplate = {
-  name: 'mongo-db-connector',
+  name: '@ldes/ldes-mongodb-connector',
   image: 'mongo:latest',
   fields: [
     {

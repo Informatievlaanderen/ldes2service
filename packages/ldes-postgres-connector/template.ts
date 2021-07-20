@@ -1,7 +1,7 @@
 import type { IConfigTemplate } from '@ldes/types';
 
 export const template: IConfigTemplate = {
-  name: 'postgres-db-connector',
+  name: '@ldes/ldes-postgres-connector',
   image: 'postgres:latest',
   fields: [
     {
