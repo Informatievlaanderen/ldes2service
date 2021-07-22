@@ -1,11 +1,13 @@
 export interface IConfigTemplate {
   name: string;
   image: string;
-  fields: Array<IFieldTemplate>;
+  fields: IFieldTemplate[];
+  composeTemplate: string;
+  helmTemplate: string;
 }
 
 export interface IFieldTemplate {
   name: string;
-  validation: Array<string>;
+  validation: string[];
   value?: string;
 }

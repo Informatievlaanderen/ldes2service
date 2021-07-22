@@ -6,7 +6,7 @@ describe('ldes-postgres-connector', () => {
   beforeEach(async () => {
     connector = new PostgresConnector({
       amountOfVersions: 2,
-      databaseName: 'ldes',
+      tableName: 'ldes',
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',

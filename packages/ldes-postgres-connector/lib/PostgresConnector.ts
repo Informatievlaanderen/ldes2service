@@ -8,40 +8,13 @@ export interface IConfigPostgresConnector extends IConfigConnector {
   database: string;
   password: string;
   port: number;
+  tableName: string;
 }
 
 export class PostgresConnector implements IWritableConnector {
   private readonly config: IConfigPostgresConnector;
   private pool: Pool;
   private poolClient: PoolClient;
-
-  /**
-   * Templates for the backend generator.
-   */
-  public static composeTemplate = `
-{hostname}: 
-  image: bitnami/postgresql
-  restart: always
-  environment:
-    POSTGRES_USER: {username}
-    POSTGRES_PASSWORD: {password}
-    POSTGRES_DB: {database}
-    POSTGRES_PORT_NUMBER: {port}
-  ports:
-    - "{port}:{port}"
-    `;
-
-  public static helmTemplate = `
-name: {hostname}
-chart: bitnami/postgresql
-namespace: ldes
-createNamespace: true
-values:
-  - postgresqlUsername: "{username}"
-  - postgresqlPassword: "{password}"
-  - postgresqlDatabase: "{database}"
-  - service.nodePort: "{port}"
-    `;
 
   public constructor(config: IConfigPostgresConnector) {
     this.config = config;
@@ -66,7 +39,7 @@ values:
       data: member,
     };
 
-    const query = `INSERT INTO "${this.config.databaseName}" (id, generated_at, type, is_version_of, data) 
+    const query = `INSERT INTO "${this.config.tableName}" (id, generated_at, type, is_version_of, data) 
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT ("id") DO NOTHING;`;
 
@@ -80,7 +53,7 @@ values:
 
     if (this.config.amountOfVersions > 0) {
       const { rows: results } = await this.poolClient.query(
-        `SELECT * FROM "${this.config.databaseName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
+        `SELECT * FROM "${this.config.tableName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
         [memberObject.is_version_of]
       );
 
@@ -90,7 +63,7 @@ values:
         const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
 
         await this.pool.query(
-          `DELETE FROM "${this.config.databaseName}" WHERE id IN (${idsToRemove.join(', ')})`
+          `DELETE FROM "${this.config.tableName}" WHERE id IN (${idsToRemove.join(', ')})`
         );
       }
     }
@@ -116,7 +89,7 @@ values:
 
     this.poolClient = await this.pool.connect();
 
-    await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.databaseName}"
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.tableName}"
         (id TEXT PRIMARY KEY,
         type TEXT NOT NULL,
         is_version_of TEXT,
