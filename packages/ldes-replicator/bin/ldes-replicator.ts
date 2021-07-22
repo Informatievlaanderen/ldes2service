@@ -12,7 +12,8 @@ import rdfDereferencer from 'rdf-dereference';
 import { DataFactory } from 'n3';
 const { namedNode } = DataFactory;
 
-import { Orchestrator, LdesShape } from '../lib/Orchestrator';
+import { Orchestrator } from '../lib/Orchestrator';
+import { LdesObjects, LdesShape } from '@ldes/types';
 
 // TODO: Parse and use CLI parameters
 
@@ -87,21 +88,37 @@ async function run(): Promise<void> {
 
   const LDESClient = newEngine();
 
-  // const streams = Object.fromEntries(URLS.split(',').map(url => [url, ({
+  // const shapes = await Promise.all(URLS.split(',').map(async (url : string) => [url, await fetchShape(url)]));
+
+  // const streams : LdesObjects = Object.fromEntries(URLS.split(',').map((url : string) => [url, ({
   //   stream: LDESClient.createReadStream(url, options),
   //   url: url,
   //   name: slugify(url, { remove: /[*+~.()'"!:@/]/g}),
-  //   shape: fetchShape(url)
+  //   shape: Object.fromEntries(shapes)[url]
   // })]));
 
-  const x = await fetchShape(URLS.split(',')[0]);
-  console.log(x);
-  // console.log(streams)
+  const streams: LdesObjects = Object.fromEntries(
+    await Promise.all(
+      URLS.split(',').map(async (url: string) => [
+        url,
+        {
+          stream: LDESClient.createReadStream(url, options),
+          url: url,
+          name: slugify(url, { remove: /[*+~.()'"!:@/]/g }),
+          shape: await fetchShape(url),
+        },
+      ])
+    )
+  );
 
-  // const orchestrator = new Orchestrator(connectors, state, streams);
+  // const x = await fetchShape(URLS.split(',')[0]);
+  // console.log(x);
+  console.log(streams);
 
-  // await orchestrator.provision();
-  // await orchestrator.run();
+  const orchestrator = new Orchestrator(connectors, state, streams);
+
+  await orchestrator.provision();
+  await orchestrator.run();
 }
 
 run().catch(error => console.error(error));

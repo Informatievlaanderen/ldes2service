@@ -1,23 +1,5 @@
 import type { Readable } from 'stream';
-import type { IState, IWritableConnector } from '@ldes/types';
-
-export type LdesShapeField = {
-  path: string;
-  datatype: string;
-  minCount?: number;
-  maxCount?: number;
-};
-
-export type LdesShape = LdesShapeField[];
-
-export type LdesObjects = {
-  [k: string]: {
-    url: string;
-    name: string;
-    stream: Readable;
-    shape: LdesShape;
-  };
-};
+import type { IState, IWritableConnector, LdesObjects } from '@ldes/types';
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
@@ -43,7 +25,7 @@ export class Orchestrator {
           new Promise<void>((resolve, reject) => {
             ldes.stream
               .on('readable', () => {
-                console.log({ clement: ldes });
+                //console.log({ clement: ldes });
 
                 this.processData(ldes.stream);
               })
@@ -57,6 +39,7 @@ export class Orchestrator {
 
   public async provision(): Promise<void> {
     const state = this.stateStore.provision();
+    Object.values(this.ldes).forEach(ldes => this.connectors.forEach(con => con.setShape(ldes.shape)));
     const connectors = Promise.all(this.connectors.map(con => con.provision()));
 
     await Promise.all([state, connectors]);
@@ -70,11 +53,11 @@ export class Orchestrator {
   }
 
   protected async processData(ldes: Readable): Promise<void> {
-    // let member: string = ldes.read();
-    // while (member) {
-    //   const copiedMember = member;
-    //   await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
-    //   member = ldes.read();
-    // }
+    let member: string = ldes.read();
+    while (member) {
+      const copiedMember = member;
+      await Promise.all(this.connectors.map(con => con.writeVersion(copiedMember)));
+      member = ldes.read();
+    }
   }
 }

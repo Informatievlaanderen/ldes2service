@@ -1,6 +1,7 @@
-import type { IWritableConnector, IConfigConnector } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector, LdesObjects, LdesShape } from '@ldes/types';
 import type { PoolClient } from 'pg';
 import { Pool } from 'pg';
+import slugify from 'slugify';
 
 export interface IConfigPostgresConnector extends IConfigConnector {
   username: string;
@@ -13,7 +14,7 @@ export interface IConfigPostgresConnector extends IConfigConnector {
 export class PostgresConnector implements IWritableConnector {
   private readonly config: IConfigPostgresConnector;
   // TODO: set the type
-  private shape?: any;
+  private shape?: LdesShape;
   private pool: Pool;
   private poolClient: PoolClient;
 
@@ -49,7 +50,7 @@ values:
     this.config = config;
   }
 
-  public setShape(shape?: any) {
+  public setShape(shape?: LdesShape) {
     this.shape = shape;
   }
 
@@ -62,44 +63,46 @@ values:
 
     // This needs to become more generic:
     // @see https://github.com/osoc21/ldes2service/issues/20
-    const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
+    // const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
 
-    const memberObject = {
-      id: JSONmember['@id'],
-      type: JSONmember['@type'],
-      generated_at: PostgresConnector.getDate(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
-      is_version_of: isVersionOf,
-      data: member,
-    };
+    // const memberObject = {
+    //   id: JSONmember['@id'],
+    //   type: JSONmember['@type'],
+    //   generated_at: PostgresConnector.getDate(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
+    //   is_version_of: isVersionOf,
+    //   data: member,
+    // };
+
+    console.debug('Member to write :', JSONmember);
 
     const query = `INSERT INTO "${this.config.databaseName}" (id, generated_at, type, is_version_of, data) 
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT ("id") DO NOTHING;`;
 
-    await this.poolClient.query(query, [
-      memberObject.id,
-      memberObject.generated_at,
-      memberObject.type,
-      memberObject.is_version_of,
-      memberObject.data,
-    ]);
+    // await this.poolClient.query(query, [
+    //   memberObject.id,
+    //   memberObject.generated_at,
+    //   memberObject.type,
+    //   memberObject.is_version_of,
+    //   memberObject.data,
+    // ]);
 
-    if (this.config.amountOfVersions > 0) {
-      const { rows: results } = await this.poolClient.query(
-        `SELECT * FROM "${this.config.databaseName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
-        [memberObject.is_version_of]
-      );
+    // if (this.config.amountOfVersions > 0) {
+    //   const { rows: results } = await this.poolClient.query(
+    //     `SELECT * FROM "${this.config.databaseName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
+    //     [memberObject.is_version_of]
+    //   );
 
-      const numberToDelete = results.length - this.config.amountOfVersions;
+    //   const numberToDelete = results.length - this.config.amountOfVersions;
 
-      if (numberToDelete > 0) {
-        const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
+    //   if (numberToDelete > 0) {
+    //     const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
 
-        await this.pool.query(
-          `DELETE FROM "${this.config.databaseName}" WHERE id IN (${idsToRemove.join(', ')})`
-        );
-      }
-    }
+    //     await this.pool.query(
+    //       `DELETE FROM "${this.config.databaseName}" WHERE id IN (${idsToRemove.join(', ')})`
+    //     );
+    //   }
+    // }
   }
 
   /**
@@ -122,15 +125,43 @@ values:
 
     this.poolClient = await this.pool.connect();
 
-    await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.databaseName}"
-        (id TEXT PRIMARY KEY,
-        type TEXT NOT NULL,
-        is_version_of TEXT,
-        generated_at TIMESTAMP,
-        data JSONB NOT NULL);`);
+    let dataTypes = new Map([
+      ['iri', 'TEXT'],
+      ['datetime', 'TIMESTAMP'],
+      ['string', 'TEXT'],
+      ['langstring', 'TEXT'],
+      ['concept', 'TEXT'],
+      ['label', 'JSONB'],
+    ]);
+
+    let query = `CREATE TABLE IF NOT EXISTS "${this.config.databaseName}" (id SERIAL PRIMARY KEY`;
+
+    this.shape!.forEach(field => {
+      query = query.concat(
+        `, ${this.extractAndSlug(field.path)} ${dataTypes.get(this.extractAndSlug(field.datatype) ?? 'TEXT')}`
+      );
+    });
+
+    query = query.concat(', data JSONB NOT NULL);');
+
+    console.debug('Creation table query', query);
+
+    await this.pool.query(query);
+
+    // await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.databaseName}"
+    //     (id TEXT PRIMARY KEY,
+    //     type TEXT NOT NULL,
+    //     is_version_of TEXT,
+    //     generated_at TIMESTAMP,
+    //     data JSONB NOT NULL);`);
 
     // We'll probably need to add more indexes to other columns
     // await this.pool.query(`CREATE INDEX ON ${this.config.databaseName} (id)`);
+  }
+
+  private extractAndSlug(value: string): string {
+    const reg = /([^#\/]+$)/gm;
+    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/g, lower: true, replacement: '_' });
   }
 
   /**
