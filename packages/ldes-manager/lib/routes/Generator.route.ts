@@ -4,12 +4,12 @@ import { template as postgresTemplate } from '@ldes/ldes-postgres-connector';
 
 generatorSetup([
   {
-    id: '@ldes/ldes-postgres-connector',
+    id: postgresTemplate.name,
     helmTemplate: postgresTemplate.helmTemplate,
     composeTemplate: postgresTemplate.composeTemplate,
   },
   {
-    id: '@ldes/ldes-mongodb-connector',
+    id: mongoTemplate.name,
     helmTemplate: mongoTemplate.helmTemplate,
     composeTemplate: mongoTemplate.composeTemplate,
   },
