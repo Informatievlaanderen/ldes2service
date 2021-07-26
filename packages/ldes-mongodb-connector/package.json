@@ -34,6 +34,7 @@
     "mongodb": "^3.6.8",
     "mongoose": "^5.13.2",
     "node-fetch": "^2.6.1",
-    "rdf-dereference": "^1.8.0"
+    "rdf-dereference": "^1.8.0",
+    "slugify": "^1.6.0"
   }
 }
