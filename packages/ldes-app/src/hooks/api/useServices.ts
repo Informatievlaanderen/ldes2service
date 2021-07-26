@@ -1,25 +1,10 @@
-import { useQuery } from 'react-query';
-import { IConnectorService } from '@ldes/types';
+import { useContext } from 'react';
+import { AppContext } from '../../App';
 
 export function useServices() {
-  return useQuery<IConnectorService[]>('connector-services', () => [
-    {
-      id: '1',
-      name: 'MongoDB',
-      image: 'mongo:latest',
-      configuration: JSON.stringify(''),
-    },
-    {
-      id: '2',
-      name: 'ElasticSearch',
-      image: 'elasticsearch:latest',
-      configuration: JSON.stringify(''),
-    },
-    {
-      id: '3',
-      name: 'PostgreSQL',
-      image: 'postgresql:latest',
-      configuration: JSON.stringify(''),
-    },
-  ]);
+  const { connectors } = useContext(AppContext);
+
+  return {
+    data: connectors,
+  };
 }

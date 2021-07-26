@@ -11,3 +11,7 @@ export interface IFieldTemplate {
   validation: string[];
   value?: string;
 }
+
+type IConfigTemplateFieldValidation = 'required' | 'string' | 'number';
+
+export type IConfigTemplates = IConfigTemplate[];
