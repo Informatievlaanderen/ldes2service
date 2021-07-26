@@ -62,11 +62,9 @@ values:
   - service.nodePort: "{port}"
     `;
 
-  public constructor(config: IConfigPostgresConnector) {
+  public constructor(config: IConfigPostgresConnector, shape: LdesShape, tableName: string) {
     this.config = config;
-  }
-
-  public setShape(shape?: LdesShape) {
+    this.config.tableName = tableName;
     this.shape = shape;
   }
 
@@ -77,19 +75,27 @@ values:
   public async writeVersion(member: string): Promise<void> {
     const JSONmember: object = JSON.parse(member);
     //
-    console.debug('Member to write :', JSONmember);
+    // console.debug('Member to write :', JSONmember);
+
+    // console.log(this.config.tableName);
+    // console.log(JSONmember);
 
     const columns = Array.from(this.columnToFieldPath.keys());
+    let values = new Array();
 
-    let query = `INSERT INTO "${this.config.databaseName}" (`
-      .concat(columns.join(', '), ', data) VALUES (')
-      .concat(columns.map((_item, index) => `$${index + 1}`).join(', '), `, $${columns.length + 1});`);
+    let query = `INSERT INTO "${this.config.tableName}" (`;
+    if (columns.length > 0) {
+      query = query
+        .concat(columns.join(', '), ', data) VALUES (')
+        .concat(columns.map((_item, index) => `$${index + 1}`).join(', '), `, $${columns.length + 1});`);
 
-    // @ts-ignore
-    let values = columns.map(column => this.getField(JSONmember[this.columnToFieldPath.get(column)]));
+      // @ts-ignore
+      values.push(...columns.map(column => this.getField(JSONmember[this.columnToFieldPath.get(column)])));
+    } else {
+      query = query.concat('data) VALUES ($1);');
+    }
+
     values.push(member);
-
-    console.log({ query, values });
 
     await this.poolClient.query(query, values);
   }
@@ -114,9 +120,9 @@ values:
 
     this.poolClient = await this.pool.connect();
 
-    let query = `CREATE TABLE IF NOT EXISTS "${this.config.databaseName}" (id SERIAL PRIMARY KEY`;
+    let query = `CREATE TABLE IF NOT EXISTS "${this.config.tableName}" (id SERIAL PRIMARY KEY`;
 
-    this.shape!.forEach(field => {
+    this.shape?.forEach(field => {
       let slugField = this.extractAndSlug(field.path);
       this.columnToFieldPath.set(slugField, field.path);
       query = query.concat(`, ${slugField} ${dataTypes.get(this.extractAndSlug(field.datatype) ?? 'TEXT')}`);
@@ -124,7 +130,8 @@ values:
 
     query = query.concat(', data JSONB NOT NULL);');
 
-    console.debug('Creation table query', query);
+    // console.debug('Creation table query', query);
+    // console.debug("Paths:", [this.columnToFieldPath.values()])
 
     await this.pool.query(query);
   }

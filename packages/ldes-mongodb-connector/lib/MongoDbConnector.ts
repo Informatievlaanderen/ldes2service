@@ -50,8 +50,6 @@ values:
     this.config = config;
   }
 
-  public setShape(shape?: any) {}
-
   /**
    * Writes a version to the corresponding backend system
    * @param member

@@ -73,29 +73,7 @@ async function run(): Promise<void> {
     throw new Error('No LDES URLs specified. Have you added the URL environment variable?');
   }
 
-  const connectors = CONNECTORS.map((con: string) => {
-    const config = JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}');
-
-    const Connector = require(process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector');
-    const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
-
-    if (!connectorName) {
-      throw new Error(`The connector ${con} couldn't be loaded correctly!`);
-    }
-
-    return new Connector[connectorName](config);
-  });
-
   const LDESClient = newEngine();
-
-  // const shapes = await Promise.all(URLS.split(',').map(async (url : string) => [url, await fetchShape(url)]));
-
-  // const streams : LdesObjects = Object.fromEntries(URLS.split(',').map((url : string) => [url, ({
-  //   stream: LDESClient.createReadStream(url, options),
-  //   url: url,
-  //   name: slugify(url, { remove: /[*+~.()'"!:@/]/g}),
-  //   shape: Object.fromEntries(shapes)[url]
-  // })]));
 
   const streams: LdesObjects = Object.fromEntries(
     await Promise.all(
@@ -111,11 +89,9 @@ async function run(): Promise<void> {
     )
   );
 
-  // const x = await fetchShape(URLS.split(',')[0]);
-  // console.log(x);
-  console.log(streams);
+  // console.debug("Streams", streams);
 
-  const orchestrator = new Orchestrator(connectors, state, streams);
+  const orchestrator = new Orchestrator(state, streams);
 
   await orchestrator.provision();
   await orchestrator.run();
