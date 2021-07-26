@@ -1,7 +1,7 @@
 {
   "name": "@ldes/generator-rest-api",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "> Exposes the helm/compose file generators as a Fastify plugin.",
   "homepage": "https://github.com/osoc21/ldes2service#readme",
   "license": "ISC",
   "main": "index.js",
