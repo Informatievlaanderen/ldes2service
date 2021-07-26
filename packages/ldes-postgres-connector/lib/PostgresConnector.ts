@@ -11,12 +11,28 @@ export interface IConfigPostgresConnector extends IConfigConnector {
   port: number;
 }
 
+enum PostgresDataType {
+  TEXT = 'TEXT',
+  TIMESTAMP = 'TIMESTAMP',
+  JSONB = 'JSONB',
+}
+
+const dataTypes = new Map<string, PostgresDataType>([
+  ['iri', PostgresDataType.TEXT],
+  ['datetime', PostgresDataType.TIMESTAMP],
+  ['string', PostgresDataType.TEXT],
+  ['langstring', PostgresDataType.TEXT],
+  ['concept', PostgresDataType.TEXT],
+  ['label', PostgresDataType.TEXT],
+]);
+
 export class PostgresConnector implements IWritableConnector {
   private readonly config: IConfigPostgresConnector;
   // TODO: set the type
   private shape?: LdesShape;
   private pool: Pool;
   private poolClient: PoolClient;
+  private columnToFieldPath: Map<string, string> = new Map();
 
   /**
    * Templates for the backend generator.
@@ -59,50 +75,23 @@ values:
    * @param member
    */
   public async writeVersion(member: string): Promise<void> {
-    const JSONmember = JSON.parse(member);
-
-    // This needs to become more generic:
-    // @see https://github.com/osoc21/ldes2service/issues/20
-    // const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
-
-    // const memberObject = {
-    //   id: JSONmember['@id'],
-    //   type: JSONmember['@type'],
-    //   generated_at: PostgresConnector.getDate(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
-    //   is_version_of: isVersionOf,
-    //   data: member,
-    // };
-
+    const JSONmember: object = JSON.parse(member);
+    //
     console.debug('Member to write :', JSONmember);
 
-    const query = `INSERT INTO "${this.config.databaseName}" (id, generated_at, type, is_version_of, data) 
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT ("id") DO NOTHING;`;
+    const columns = Array.from(this.columnToFieldPath.keys());
 
-    // await this.poolClient.query(query, [
-    //   memberObject.id,
-    //   memberObject.generated_at,
-    //   memberObject.type,
-    //   memberObject.is_version_of,
-    //   memberObject.data,
-    // ]);
+    let query = `INSERT INTO "${this.config.databaseName}" (`
+      .concat(columns.join(', '), ', data) VALUES (')
+      .concat(columns.map((_item, index) => `$${index + 1}`).join(', '), `, $${columns.length + 1});`);
 
-    // if (this.config.amountOfVersions > 0) {
-    //   const { rows: results } = await this.poolClient.query(
-    //     `SELECT * FROM "${this.config.databaseName}" WHERE is_version_of = $1 ORDER BY generated_at ASC`,
-    //     [memberObject.is_version_of]
-    //   );
+    // @ts-ignore
+    let values = columns.map(column => this.getField(JSONmember[this.columnToFieldPath.get(column)]));
+    values.push(member);
 
-    //   const numberToDelete = results.length - this.config.amountOfVersions;
+    console.log({ query, values });
 
-    //   if (numberToDelete > 0) {
-    //     const idsToRemove = results.slice(0, numberToDelete).map((value: any) => `'${value.id}'`);
-
-    //     await this.pool.query(
-    //       `DELETE FROM "${this.config.databaseName}" WHERE id IN (${idsToRemove.join(', ')})`
-    //     );
-    //   }
-    // }
+    await this.poolClient.query(query, values);
   }
 
   /**
@@ -125,21 +114,12 @@ values:
 
     this.poolClient = await this.pool.connect();
 
-    let dataTypes = new Map([
-      ['iri', 'TEXT'],
-      ['datetime', 'TIMESTAMP'],
-      ['string', 'TEXT'],
-      ['langstring', 'TEXT'],
-      ['concept', 'TEXT'],
-      ['label', 'JSONB'],
-    ]);
-
     let query = `CREATE TABLE IF NOT EXISTS "${this.config.databaseName}" (id SERIAL PRIMARY KEY`;
 
     this.shape!.forEach(field => {
-      query = query.concat(
-        `, ${this.extractAndSlug(field.path)} ${dataTypes.get(this.extractAndSlug(field.datatype) ?? 'TEXT')}`
-      );
+      let slugField = this.extractAndSlug(field.path);
+      this.columnToFieldPath.set(slugField, field.path);
+      query = query.concat(`, ${slugField} ${dataTypes.get(this.extractAndSlug(field.datatype) ?? 'TEXT')}`);
     });
 
     query = query.concat(', data JSONB NOT NULL);');
@@ -147,16 +127,6 @@ values:
     console.debug('Creation table query', query);
 
     await this.pool.query(query);
-
-    // await this.pool.query(`CREATE TABLE IF NOT EXISTS "${this.config.databaseName}"
-    //     (id TEXT PRIMARY KEY,
-    //     type TEXT NOT NULL,
-    //     is_version_of TEXT,
-    //     generated_at TIMESTAMP,
-    //     data JSONB NOT NULL);`);
-
-    // We'll probably need to add more indexes to other columns
-    // await this.pool.query(`CREATE INDEX ON ${this.config.databaseName} (id)`);
   }
 
   private extractAndSlug(value: string): string {
@@ -173,18 +143,18 @@ values:
   }
 
   // TODO: port this to other connectors
-  private static getDate(dateProperty: string | { '@id': string }): Date | null {
-    let generatedAtTime;
-    switch (typeof dateProperty) {
-      case 'string':
-        generatedAtTime = new Date(dateProperty);
-        break;
-      case 'object':
-        generatedAtTime = new Date(dateProperty['@id']);
-        break;
-      default:
-        generatedAtTime = null;
+
+  private getField(property: any, datatype: PostgresDataType): Date | string | null {
+    const value: string | undefined = property?.['@value'] ?? property?.['@id'] ?? property;
+
+    if (value === undefined || value === null) {
+      return null;
     }
-    return generatedAtTime && !Number.isNaN(generatedAtTime.getTime()) ? generatedAtTime : null;
+
+    // if(datatype === PostgresDataType.TIMESTAMP){
+    //   return new Date(value)
+    // }
+
+    return value;
   }
 }
