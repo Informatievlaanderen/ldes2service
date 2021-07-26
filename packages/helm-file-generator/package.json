@@ -1,7 +1,7 @@
 {
   "name": "@ldes/helm-file-generator",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "> Generates a helmfile to run an LDES replicator and its connected backends with user provided settings.",
   "homepage": "https://github.com/osoc21/ldes2service#readme",
   "license": "ISC",
   "main": "index.js",

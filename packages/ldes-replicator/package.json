@@ -1,7 +1,7 @@
 {
   "name": "@ldes/replicator",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "> Allows you to replicate any amount of LDES into different backends via connectors.",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
   "license": "ISC",
   "main": "lib/ldes-replicator.js",
