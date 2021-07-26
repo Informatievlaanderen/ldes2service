@@ -1,0 +1,96 @@
+# Default values for ldes-replicator.
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/osoc21/ldes-replicator
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube.
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Replicator settings
+
+replicator:
+  urls: []
+    #- "https://smartdata.dev-vlaanderen.be/base/straatnaam"
+  state:
+    id: 'replicator'
+    # host: 'redis'
+    # port: 6379
+    # password: 1234
+  polling_interval: 5000
+
+connectors: {}
+
+#connectors:
+#  PG:
+#    type: '@ldes/ldes-postgres-connector'
+#    settings:
+#      amountOfVersions: 0
+#      tableName: ldes
+#      username: postgres
+#      password: postgres
+#      database: postgres
+#      hostname: postgres
+#      port: 5432
+
+envOverride: false
+
+#envOverride:
+#  - name: URLS
+#    value: https://apidg.gent.be/opendata/adlib2eventstream/v1/dmg/objecten
+#  - name: STATE_CONFIG
+#    value: '{"id":"replicator_0",
+#    "host":"redis",
+#    "port":6379}'
+#  - name: POLL_INTERVAL
+#    value: '5000'
+#  - name: CONNECTORS
+#    value: '[0,1]'
+#  - name: CONNECTOR_0_TYPE
+#    value: '@ldes/ldes-postgres-connector'
+#  - name: CONNECTOR_0_CONFIG
+#    value: '{"amountOfVersions":0,
+#    "tableName":"ldes",
+#    "username":"${POSTGRES_USER}",
+#    "password":"${POSTGRES_PASSWORD}",
+#    "database":"${POSTGRES_DB}",
+#    "hostname":"postgres",
+#    "port":5432}'
+#  - name: CONNECTOR_1_TYPE
+#    value: '@ldes/ldes-mongodb-connector'
+#  - name: CONNECTOR_1_CONFIG
+#    value: '{"amountOfVersions":0,
+#      "username":"${MONGO_USER}",
+#      "password":"${MONGO_PASSWORD}",
+#      "database":"${MONGO_DB}",
+#      "hostname":"mongo",
+#      "port":27017}'

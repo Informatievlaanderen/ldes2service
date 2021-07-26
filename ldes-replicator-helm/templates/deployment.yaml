@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ldes-replicator.fullname" . }}
+  labels:
+    {{- include "ldes-replicator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ldes-replicator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ldes-replicator.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.envOverride }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{ else }}
+          env:
+            - name: URLS
+              value: {{ include "ldes-replicator.urls" . | quote }}
+            - name: STATE_CONFIG
+              value: {{ toJson .Values.replicator.state | quote }}
+            - name: POLL_INTERVAL
+              value: {{ .Values.replicator.polling_interval | quote }}
+            - name: CONNECTORS
+              value: {{ keys .Values.connectors | toJson | quote }}
+            {{- range $key, $value := .Values.connectors }}
+            - name: {{ printf "CONNECTOR_%s_TYPE" $key }}
+              value: {{ $value.type | quote }}
+            - name: {{ printf "CONNECTOR_%s_CONFIG" $key }}
+              value: {{ toJson $value.settings | quote }}
+            {{ end }}
+          {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -34,18 +34,16 @@ services:
       STATE_CONFIG: '{"id":"replicator_0",
         "host":"redis",
         "port":6379}'
-      POLL_INTERVAL: 5000
+      POLL_INTERVAL: '5000'
       CONNECTORS: '[0,1]'
-      CONNECTOR_0_NAME: postgres
       CONNECTOR_0_TYPE: '@ldes/ldes-postgres-connector'
       CONNECTOR_0_CONFIG: '{"amountOfVersions":0,
-        "databaseName":"ldes",
+        "tableName":"ldes",
         "username":"${POSTGRES_USER}",
         "password":"${POSTGRES_PASSWORD}",
         "database":"${POSTGRES_DB}",
         "hostname":"postgres",
         "port":5432}'
-      CONNECTOR_1_NAME: mongo
       CONNECTOR_1_TYPE: '@ldes/ldes-mongodb-connector'
       CONNECTOR_1_CONFIG: '{"amountOfVersions":0,
         "username":"${MONGO_USER}",

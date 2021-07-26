@@ -65,7 +65,7 @@ const GeneratorRoute: FastifyPluginAsync = async (
     async (_request: any, _reply: any) => {
       switch (_request.body.type) {
         case 'helm':
-          _reply.send(helmFileGenerator.generate(_request.body.services));
+          _reply.send(helmFileGenerator.generate(_request.body.services, _request.body.replicator));
           break;
         case 'compose':
           _reply.send(dockerComposeGenerator.generate(_request.body.services, _request.body.replicator));
