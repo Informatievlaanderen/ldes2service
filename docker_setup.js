@@ -13,7 +13,7 @@ async function run() {
     neededConnectors.push(cmd);
     await execa('lerna', ['add', cmd, '--scope=@ldes/replicator']);
   }
-  if (neededConnectors.filter(el => !LDES_CONNECTORS.contains(el)).length === 0) {
+  if (neededConnectors.filter(el => !LDES_CONNECTORS.includes(el)).length === 0) {
     console.log('Skipping install...');
     return;
   }
