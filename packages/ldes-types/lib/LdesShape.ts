@@ -1,19 +1,19 @@
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-export type LdesShapeField = {
+export interface LdesShapeField {
   path: string;
   datatype: string;
   minCount?: number;
   maxCount?: number;
-};
+}
 
 export type LdesShape = LdesShapeField[];
 
-export type LdesObjects = {
-  [k: string]: {
-    url: string;
-    name: string;
-    stream: Readable;
-    shape: LdesShape;
-  };
-};
+export interface LdesObject {
+  url: string;
+  name: string;
+  stream: Readable;
+  shape: LdesShape;
+}
+
+export type LdesObjects = Record<string, LdesObject>;

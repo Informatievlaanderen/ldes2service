@@ -1,5 +1,4 @@
-import type { Readable } from 'stream';
-import type { IState, IWritableConnector, LdesObjects } from '@ldes/types';
+import type { IState, IWritableConnector, LdesObject, LdesObjects } from '@ldes/types';
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
@@ -7,7 +6,7 @@ import type { IState, IWritableConnector, LdesObjects } from '@ldes/types';
 export class Orchestrator {
   private readonly stateStore: IState;
   private readonly ldesObjects: LdesObjects;
-  private ldesConnectors: Map<Readable, IWritableConnector[]> = new Map();
+  private readonly ldesConnectors: Map<LdesObject, IWritableConnector[]> = new Map();
 
   public constructor(stateStore: IState, ldesObjects: LdesObjects) {
     this.stateStore = stateStore;
@@ -18,17 +17,25 @@ export class Orchestrator {
    * Start listening to the events and pipe them to the connectors
    */
   public async run(): Promise<void[]> {
-    const runs = Array.from(this.ldesConnectors.keys()).map(stream => {
-      new Promise<void>((resolve, reject) => {
-        stream
-          .on('readable', () => {
-            // @ts-ignore
-            console.debug('Connectors : ', [this.ldesConnectors.get(stream)?.map(x => x.config)]);
-            this.processData(stream, this.ldesConnectors.get(stream)!);
-          })
-          .on('error', error => reject(error));
+    console.log('START RUN');
 
-        stream.on('end', () => resolve());
+    const runs = Array.from(this.ldesConnectors.keys()).map(ldesObject => {
+      const connectors = this.ldesConnectors.get(ldesObject);
+
+      if (!connectors) {
+        return;
+      }
+
+      return new Promise<void>((resolve, reject) => {
+        ldesObject.stream
+          .on('readable', async () => {
+            console.log(connectors.length);
+            console.log(ldesObject.name);
+            await this.processData(ldesObject, connectors);
+          })
+          .on('error', (error: any) => reject(error));
+
+        ldesObject.stream.on('end', () => resolve());
       });
     });
 
@@ -58,23 +65,12 @@ export class Orchestrator {
         return connector;
       });
 
-      // @ts-ignore
-      // console.log({ ldesObject, ldesConnectors: ldesConnectors.map(x => x.config) })
-
-      this.ldesConnectors.set(ldesObject.stream, ldesConnectors);
+      this.ldesConnectors.set(ldesObject, ldesConnectors);
     });
 
-    // console.log({promises});
+    await Promise.all([state, ...promises]);
 
-    try {
-      await Promise.all([state, ...promises]);
-    } catch (e: any) {
-      console.error(e);
-    }
-
-    console.log(Array.from(this.ldesConnectors.values()));
-    // @ts-ignore
-    console.debug('LDES CONNECTORS', [Array.from(this.ldesConnectors.values()).map(x => x[1].config)]);
+    console.log('END PROVISION');
   }
 
   /**
@@ -84,20 +80,15 @@ export class Orchestrator {
     throw new Error('not implemented');
   }
 
-  protected async processData(ldes: Readable, connectors: IWritableConnector[]): Promise<void> {
-    let member: string = ldes.read();
-
-    // console.log("processData");
-    // @ts-ignore
-    // console.log({ connectors, member, tables: connectors.map(con => con.config.table) })
+  protected async processData(ldesObject: LdesObject, connectors: IWritableConnector[]): Promise<void> {
+    let member: string = ldesObject.stream.read();
 
     while (member) {
       const copiedMember = member;
+
       await Promise.all(connectors.map(con => con.writeVersion(copiedMember)));
 
-      // @ts-ignore
-      member = null;
-      // member = ldes.read();
+      member = ldesObject.stream.read();
     }
   }
 }
