@@ -1,1 +1,1 @@
-export * from './lib/Manager';
+require('./bin/server');
