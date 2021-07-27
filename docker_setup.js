@@ -1,30 +1,27 @@
-const { exec } = require('child_process');
-
-//Promise interface to execute commands
-function execShellCommand(cmd) {
-  return new Promise((resolve, reject) => {
-    exec(cmd, { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
-      if (error) {
-        console.warn(error);
-      } else if (stdout) {
-        console.log(stdout);
-      } else {
-        console.log(stderr);
-      }
-      resolve(!!stdout);
-    });
-  });
-}
+const execa = require('execa');
 
 const CONNECTORS = JSON.parse(process.env.CONNECTORS || '[]');
 
+const LDES_CONNECTORS = ['@ldes/ldes-postgres-connector', '@ldes/ldes-mongodb-connector'];
+
+const neededConnectors = [];
+
 async function run() {
   for (const con of CONNECTORS) {
-    const cmd = process.env[`CONNECTOR_${con}_TYPE`]
-    console.log(cmd);
-    await execShellCommand(`lerna add ${cmd} --scope=@ldes/replicator`);
+    const cmd = process.env[`CONNECTOR_${con}_TYPE`];
+    console.log(`Adding ${cmd}...`);
+    neededConnectors.push(cmd);
+    await execa('lerna', ['add', cmd, '--scope=@ldes/replicator']);
   }
-  await execShellCommand('npm i');
+  if (neededConnectors.filter(el => !LDES_CONNECTORS.includes(el)).length === 0) {
+    console.log('Skipping install...');
+    return;
+  }
+  console.log('Installing dependencies...');
+  const install = execa('npm', ['i']);
+  install.stdout.pipe(process.stdout);
+  install.stderr.pipe(process.stderr);
+  await install;
 }
 
 run().catch(error => console.error(error))

@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
+import sequelize from '../../bin/orm/sequelize';
 import { Connector } from '../models/Connector.model';
 import { Orchestrator } from '../models/Orchestrator.model';
-import sequelize from '../../bin/orm/sequelize';
 
 interface connectorParams {
   id: number;
@@ -50,7 +50,7 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
     try {
       const id = request.params.id;
       const connector = await connectorRepository.findOne({
-        where: { id: id },
+        where: { id },
         include: [orchestratorRepository],
       });
       if (!connector) {
@@ -66,8 +66,10 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
 
   server.post<{ Body: connectorAttrs }>(
     '/connectors',
-    { schema: { body: connectorBodyJsonSchema } },
+    //{ schema: { body: connectorBodyJsonSchema } },
     async (request, reply) => {
+      console.log(request.body);
+
       try {
         const { name, type, image, port, config } = request.body;
         await connectorRepository.create({
@@ -91,7 +93,7 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
     try {
       const id = request.params.id;
       await connectorRepository.destroy({
-        where: { id: id },
+        where: { id },
       });
 
       return reply.code(200).send({ message: 'Deleted' });
@@ -111,7 +113,7 @@ const ConnectorRoute: FastifyPluginAsync = async (server: FastifyInstance, optio
         const id = request.params.id;
 
         const connector = await connectorRepository.findOne({
-          where: { id: id },
+          where: { id },
         });
 
         if (connector) {

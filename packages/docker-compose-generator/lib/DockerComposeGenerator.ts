@@ -10,7 +10,7 @@ interface IComposeFile {
 }
 
 export class DockerComposeGenerator {
-  private options: IGeneratorApiSetup[];
+  private options: IGeneratorApiSetup[] = [];
 
   public setup(options: IGeneratorApiSetup[]): void {
     this.options = options;
@@ -59,7 +59,6 @@ export class DockerComposeGenerator {
         redis: {
           image: 'redis:6',
           command: 'redis-server --appendonly yes',
-          ports: ['6379:6379'],
         },
       });
     }
@@ -70,7 +69,7 @@ export class DockerComposeGenerator {
         environment: {
           URLS: replicator.urls,
           STATE_CONFIG: JSON.stringify(replicator.state),
-          POLL_INTERVAL: Number.parseInt(replicator.polling_interval || '5000', 10),
+          POLL_INTERVAL: replicator.polling_interval || '5000',
         },
       },
     };

@@ -9,6 +9,7 @@ export interface IConfigPostgresConnector extends IConfigConnector {
   database: string;
   password: string;
   port: number;
+  tableName: string;
 }
 
 enum PostgresDataType {
@@ -34,35 +35,7 @@ export class PostgresConnector implements IWritableConnector {
   private poolClient: PoolClient;
   private columnToFieldPath: Map<string, string> = new Map();
 
-  /**
-   * Templates for the backend generator.
-   */
-  public static composeTemplate = `
-{hostname}: 
-  image: bitnami/postgresql
-  restart: always
-  environment:
-    POSTGRES_USER: {username}
-    POSTGRES_PASSWORD: {password}
-    POSTGRES_DB: {database}
-    POSTGRES_PORT_NUMBER: {port}
-  ports:
-    - "{port}:{port}"
-    `;
-
-  public static helmTemplate = `
-name: {hostname}
-chart: bitnami/postgresql
-namespace: ldes
-createNamespace: true
-values:
-  - postgresqlUsername: "{username}"
-  - postgresqlPassword: "{password}"
-  - postgresqlDatabase: "{database}"
-  - service.nodePort: "{port}"
-    `;
-
-  public constructor(config: IConfigPostgresConnector, shape: LdesShape, tableName: string) {
+  public constructor(config: IConfigPostgresConnector) {
     this.config = config;
     this.config.tableName = tableName;
     this.shape = shape;
