@@ -22,10 +22,29 @@ const STATE_CONFIG = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}
 const CONNECTORS = JSON.parse(process.env.CONNECTORS || '[]');
 const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10);
 
+/**
+ * This code fetches the shape by dereferencing the LDES URI, and then always derefencing the shape again
+ * TODO We might want to catch the fact that possibly the shape is already contained in the received quads.
+ */
 async function fetchShape(ldesURI: string): Promise<LdesShape> {
-  const json = await fetch(ldesURI).then(res => res.json());
-
-  const { quads } = await rdfDereferencer.dereference(json.shacl.shape);
+  const {LDESquads} = await rdfDereferencer.dereference(ldesURI);
+  var shapeURL = "";
+  for (let quad of LDESquads) {
+    if (quad.subject.value === ldesURI && quad.predicate.value === 'https://w3id.org/tree#shape') {
+      //TODO: detect if this is a blank node. If it is, we’ll need to extract the shape from the current page instead!
+      if (quad.object.termType === 'BlankNode') {
+        //FAIL the code: not yet supported -- will implement later
+        throw new Exception("Blank node shapes not supported yet");
+      }
+      shapeURL = quad.object.value;
+      
+    }
+  }
+  if (shapeURL === "") {
+      throw new Exception("No shape URL found when derefencing the LDES URI");
+  }
+  
+  const { quads } = await rdfDereferencer.dereference(shapeURL);
 
   const store = await storeStream(quads);
 
