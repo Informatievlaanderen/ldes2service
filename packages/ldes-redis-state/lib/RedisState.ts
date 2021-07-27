@@ -3,7 +3,7 @@ import type { IState } from '@ldes/types';
 import type { WrappedNodeRedisClient } from 'handy-redis';
 import { createNodeRedisClient } from 'handy-redis';
 
-interface IRedisStateConfig {
+export interface IRedisStateConfig {
   id: string;
   host?: string;
   port?: number;

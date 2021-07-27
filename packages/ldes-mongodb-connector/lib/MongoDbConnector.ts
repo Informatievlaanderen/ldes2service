@@ -4,23 +4,33 @@ import { MongoClient } from 'mongodb';
 import slugify from 'slugify';
 
 export interface IConfigMongoDbConnector extends IConfigConnector {
-  username: string;
+  username?: string;
   hostname: string;
   database: string;
-  password: string;
+  password?: string;
   port: number;
+  connectionString?: string;
+  extraParameters?: string;
 }
+const defaultConfig: IConfigMongoDbConnector = {
+  amountOfVersions: 0,
+  hostname: 'localhost',
+  database: 'admin',
+  port: 27_017,
+  extraParameters: '',
+};
 
 export class MongoDbConnector implements IWritableConnector {
   private readonly config: IConfigMongoDbConnector;
   private client: MongoClient;
   private db: Db;
-  private shape?: LdesShape;
-  private columnToFieldPath: Map<string, string> = new Map();
+  private readonly shape?: LdesShape;
+  private readonly id: string;
+  private readonly columnToFieldPath: Map<string, string> = new Map();
 
-  public constructor(config: IConfigMongoDbConnector, shape: LdesShape, tableName: string) {
-    this.config = config;
-    this.config.tableName = tableName;
+  public constructor(config: IConfigMongoDbConnector, shape: LdesShape, id: string) {
+    this.config = { ...defaultConfig, ...config };
+    this.id = id;
     this.shape = shape;
   }
 
@@ -31,18 +41,16 @@ export class MongoDbConnector implements IWritableConnector {
   public async writeVersion(member: any): Promise<void> {
     const JSONmember = JSON.parse(member);
 
-    // console.log("Member", JSONmember);
-
-    let data: any = {};
+    const data: any = {};
 
     Array.from(this.columnToFieldPath.keys()).forEach(key => {
-      // @ts-ignore
+      // @ts-expect-error get never returns undefined
       data[key] = JSONmember[this.columnToFieldPath.get(key)];
     });
 
     data[data] = member;
 
-    const collection = this.db.collection(this.config.tableName);
+    const collection = this.db.collection(this.id);
     await collection.insertOne(data);
   }
 
@@ -55,7 +63,7 @@ export class MongoDbConnector implements IWritableConnector {
     this.client = new MongoClient(url);
 
     this.shape?.forEach(field => {
-      let slugField = this.extractAndSlug(field.path);
+      const slugField = MongoDbConnector.extractAndSlug(field.path);
       this.columnToFieldPath.set(slugField, field.path);
     });
 
@@ -67,15 +75,18 @@ export class MongoDbConnector implements IWritableConnector {
   }
 
   private getURI(): string {
-    const config = this.config;
+    const conf = this.config;
+    const auth = conf.username && conf.password ? `${conf.username}:${conf.password}@` : '';
 
-    //return `mongodb://${config.username}:${config.password}@${config.hostname}:${config.port}/${config.database}`;
-    return 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false';
+    return (
+      conf.connectionString ??
+      `mongodb://${auth}${conf.hostname}:${conf.port}/${conf.database}${conf.extraParameters}`
+    );
   }
 
-  private extractAndSlug(value: string): string {
-    const reg = /([^#\/]+$)/gm;
-    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/g, lower: true, replacement: '_' });
+  private static extractAndSlug(value: string): string {
+    const reg = /([^#/]+$)/gmu;
+    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/gu, lower: true, replacement: '_' });
   }
 
   /**

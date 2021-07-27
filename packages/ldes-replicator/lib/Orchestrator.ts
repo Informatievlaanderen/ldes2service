@@ -1,4 +1,11 @@
-import type { IState, IWritableConnector, LdesObject, LdesObjects } from '@ldes/types';
+import type {
+  IState,
+  IWritableConnector,
+  IConnectorConfig,
+  LdesObject,
+  LdesObjects,
+  ConnectorConfigs,
+} from '@ldes/types';
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.
@@ -7,10 +14,12 @@ export class Orchestrator {
   private readonly stateStore: IState;
   private readonly ldesObjects: LdesObjects;
   private readonly ldesConnectors: Map<LdesObject, IWritableConnector[]> = new Map();
+  private readonly connectorsConfig: ConnectorConfigs;
 
-  public constructor(stateStore: IState, ldesObjects: LdesObjects) {
+  public constructor(stateStore: IState, ldesObjects: LdesObjects, connectorsConfig: ConnectorConfigs) {
     this.stateStore = stateStore;
     this.ldesObjects = ldesObjects;
+    this.connectorsConfig = connectorsConfig;
   }
 
   /**
@@ -29,8 +38,6 @@ export class Orchestrator {
       return new Promise<void>((resolve, reject) => {
         ldesObject.stream
           .on('readable', async () => {
-            console.log(connectors.length);
-            console.log(ldesObject.name);
             await this.processData(ldesObject, connectors);
           })
           .on('error', (error: any) => reject(error));
@@ -45,25 +52,26 @@ export class Orchestrator {
   public async provision(): Promise<void> {
     const promises: Promise<void>[] = [];
     const state = this.stateStore.provision();
-    const connectors = JSON.parse(process.env.CONNECTORS || '[]');
 
     Object.values(this.ldesObjects).forEach(ldesObject => {
-      const ldesConnectors: IWritableConnector[] = connectors.map((con: string) => {
-        const config = JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}');
-        const Connector = require(process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector');
+      const ldesConnectors: IWritableConnector[] = Object.values(this.connectorsConfig).map(
+        (con: IConnectorConfig) => {
+          const config = con.settings || {};
+          const Connector = require(con.type || '@ldes/ldes-dummy-connector');
 
-        const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
+          const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
 
-        if (!connectorName) {
-          throw new Error(`The connector ${con} couldn't be loaded correctly!`);
+          if (!connectorName) {
+            throw new Error(`The connector ${con.type} couldn't be loaded correctly!`);
+          }
+
+          const connector = new Connector[connectorName](config, ldesObject.shape, ldesObject.name);
+
+          promises.push(connector.provision());
+
+          return connector;
         }
-
-        const connector = new Connector[connectorName](config, ldesObject.shape, ldesObject.name);
-
-        promises.push(connector.provision());
-
-        return connector;
-      });
+      );
 
       this.ldesConnectors.set(ldesObject, ldesConnectors);
     });

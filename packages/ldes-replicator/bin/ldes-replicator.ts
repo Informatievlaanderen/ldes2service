@@ -2,73 +2,82 @@
  * CLI interface where manual dependency injection happens
  */
 
+import * as fs from 'fs/promises';
+import type { IRedisStateConfig } from '@ldes/ldes-redis-state';
 import { RedisState } from '@ldes/ldes-redis-state';
+import type { ConnectorConfigs, LdesObjects, LdesShape } from '@ldes/types';
+import { Command, flags } from '@oclif/command';
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import { DataFactory } from 'n3';
-import fetch from 'node-fetch';
 import rdfDereferencer from 'rdf-dereference';
 import { storeStream } from 'rdf-store-stream';
 import slugify from 'slugify';
 
+import { dependenciesSetup } from '../lib/dependenciesSetup';
+import { Orchestrator } from '../lib/Orchestrator';
+
 const { namedNode } = DataFactory;
 
-import { Orchestrator } from '../lib/Orchestrator';
-import type { LdesObjects, LdesShape } from '@ldes/types';
-
-// TODO: Parse and use CLI parameters
-
-const URLS = process.env.URLS;
-const STATE_CONFIG = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}');
-const CONNECTORS = JSON.parse(process.env.CONNECTORS || '[]');
-const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10);
+interface IReplicatorConfig {
+  replicator: {
+    ldes: {
+      url: string;
+      shape?: string;
+      shapeUrl?: string;
+    }[];
+    state: IRedisStateConfig;
+    polling_interval: number;
+  };
+  connectors: ConnectorConfigs;
+}
 
 /**
  * This code fetches the shape by dereferencing the LDES URI, and then always derefencing the shape again
  * TODO We might want to catch the fact that possibly the shape is already contained in the received quads.
  */
-async function fetchShape(ldesURI: string): Promise<LdesShape> {
-  const {LDESquads} = await rdfDereferencer.dereference(ldesURI);
-  let shapeURL = "";
-  for (let quad of LDESquads) {
-    if (quad.subject.value === ldesURI && quad.predicate.value === 'https://w3id.org/tree#shape') {
-      //TODO: detect if this is a blank node. If it is, we’ll need to extract the shape from the current page instead!
-      if (quad.object.termType === 'BlankNode') {
-        //FAIL the code: not yet supported -- will implement later
-        throw new Exception("Blank node shapes not supported yet");
-      }
-      shapeURL = quad.object.value;
-      
-    }
-  }
-  if (shapeURL === "") {
-      throw new Exception("No shape URL found when derefencing the LDES URI");
-  }
-  
-  const { quads } = await rdfDereferencer.dereference(shapeURL);
+async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<LdesShape> {
+  const { quads: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
 
-  const store = await storeStream(quads);
+  // Console.debug('ldesQuads :', ldesQuads);
+  if (!shapeURI) {
+    const storeQuads = await storeStream(ldesQuads);
+    // Console.debug('storeQuads :', storeQuads);
+
+    storeQuads
+      // @ts-expect-error the method exists
+      .getQuads(undefined, namedNode('https://w3id.org/tree#shape'))
+      .forEach((quad: any) => (shapeURI = quad.object.value));
+  }
+
+  if (shapeURI === '') {
+    throw new Error('No shape URL found when derefencing the LDES URI');
+  }
+
+  const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
+
+  const store = await storeStream(shapeQuads);
 
   const paths = Object.fromEntries(
     store
-      // @ts-expect-error
+      // @ts-expect-error the method exists
       .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#path'))
       .map((quad: any) => [quad.subject.value, quad])
   );
   const datatypes = Object.fromEntries(
     store
-      // @ts-expect-error
+      // @ts-expect-error the method exists
       .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#datatype'))
       .map((quad: any) => [quad.subject.value, quad])
   );
   const nodeKinds = Object.fromEntries(
     store
-      // @ts-expect-error
+      // @ts-expect-error the method exists
       .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#nodeKind'))
       .map((quad: any) => [quad.subject.value, quad])
   );
   const classes = Object.fromEntries(
     store
-      // @ts-expect-error
+      // @ts-expect-error the method exists
       .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#class'))
       .map((quad: any) => [quad.subject.value, quad])
   );
@@ -79,35 +88,62 @@ async function fetchShape(ldesURI: string): Promise<LdesShape> {
   }));
 }
 
-async function run(): Promise<void> {
-  const state = new RedisState(STATE_CONFIG);
+class LdesReplicator extends Command {
+  public static description = 'describe the command here';
 
-  const options = {
-    pollingInterval: POLL_INTERVAL,
+  public static flags = {
+    version: flags.version({ char: 'v' }),
+    help: flags.help({ char: 'h' }),
+    setup: flags.boolean({ char: 's', description: 'install the dependencies from the configuration file.' }),
   };
 
-  if (!URLS) {
-    throw new Error('No LDES URLs specified. Have you added the URL environment variable?');
+  public static args = [
+    {
+      name: 'CONFIG',
+      description: 'JSON Configuration file',
+      default: `${process.cwd()}/config.json`,
+    },
+  ];
+
+  public async run(): Promise<void> {
+    const { args, flags: fl } = this.parse(LdesReplicator);
+
+    try {
+      await fs.access(args.CONFIG, 4);
+    } catch {
+      throw new Error("The config file doesn't exist or isn't a file.");
+    }
+    const config: IReplicatorConfig = JSON.parse(await fs.readFile(args.CONFIG, { encoding: 'utf8' }));
+
+    if (fl.setup) {
+      return await dependenciesSetup(config);
+    }
+
+    const state = new RedisState(config.replicator.state);
+
+    const options = {
+      pollingInterval: config.replicator.polling_interval,
+    };
+
+    const streams: LdesObjects = Object.fromEntries(
+      await Promise.all(
+        config.replicator.ldes.map(async ldes => [
+          ldes.url,
+          {
+            stream: newEngine().createReadStream(ldes.url, options),
+            url: ldes.url,
+            name: slugify(ldes.url, { remove: /[!"'()*+./:@~]/gu }),
+            shape: await fetchShape({ shapeURI: ldes.shapeUrl, ldesURI: ldes.url }),
+          },
+        ])
+      )
+    );
+
+    const orchestrator = new Orchestrator(state, streams, config.connectors);
+    await orchestrator.provision();
+    await orchestrator.run();
   }
-
-  const streams: LdesObjects = Object.fromEntries(
-    await Promise.all(
-      URLS.split(',').map(async (url: string) => [
-        url,
-        {
-          stream: newEngine().createReadStream(url, options),
-          url,
-          name: slugify(url, { remove: /[!"'()*+./:@~]/g }),
-          shape: await fetchShape(url),
-        },
-      ])
-    )
-  );
-
-  const orchestrator = new Orchestrator(state, streams);
-
-  await orchestrator.provision();
-  await orchestrator.run();
 }
 
-run().catch(error => console.error(error));
+// @ts-expect-error It's a promise, not a PromiseLike...
+LdesReplicator.run().catch(require('@oclif/errors/handle'));

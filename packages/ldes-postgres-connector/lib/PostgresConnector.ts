@@ -1,4 +1,4 @@
-import type { IWritableConnector, IConfigConnector, LdesObjects, LdesShape } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector, LdesShape } from '@ldes/types';
 import type { PoolClient } from 'pg';
 import { Pool } from 'pg';
 import slugify from 'slugify';
@@ -9,13 +9,22 @@ export interface IConfigPostgresConnector extends IConfigConnector {
   database: string;
   password: string;
   port: number;
-  tableName: string;
 }
+
+const defaultConfig: IConfigPostgresConnector = {
+  amountOfVersions: 0,
+  username: 'postgres',
+  hostname: 'localhost',
+  database: 'postgres',
+  password: 'postgres',
+  port: 5_432,
+};
 
 enum PostgresDataType {
   TEXT = 'TEXT',
   TIMESTAMP = 'TIMESTAMP',
   JSONB = 'JSONB',
+  INT = 'INT',
 }
 
 const dataTypes = new Map<string, PostgresDataType>([
@@ -25,20 +34,21 @@ const dataTypes = new Map<string, PostgresDataType>([
   ['langstring', PostgresDataType.TEXT],
   ['concept', PostgresDataType.TEXT],
   ['label', PostgresDataType.TEXT],
+  ['integer', PostgresDataType.INT],
 ]);
 
 export class PostgresConnector implements IWritableConnector {
   private readonly config: IConfigPostgresConnector;
-  // TODO: set the type
-  private shape?: LdesShape;
+  private readonly shape?: LdesShape;
   private pool: Pool;
   private poolClient: PoolClient;
-  private columnToFieldPath: Map<string, string> = new Map();
+  private readonly columnToFieldPath: Map<string, string> = new Map();
+  private readonly id: string;
 
-  public constructor(config: IConfigPostgresConnector) {
-    this.config = config;
-    this.config.tableName = tableName;
+  public constructor(config: IConfigPostgresConnector, shape: LdesShape, id: string) {
+    this.config = { ...defaultConfig, ...config };
     this.shape = shape;
+    this.id = id;
   }
 
   /**
@@ -49,20 +59,18 @@ export class PostgresConnector implements IWritableConnector {
     const JSONmember: object = JSON.parse(member);
     //
     // console.debug('Member to write :', JSONmember);
-
-    // console.log(this.config.tableName);
     // console.log(JSONmember);
 
     const columns = Array.from(this.columnToFieldPath.keys());
-    let values = new Array();
+    const values = [];
 
-    let query = `INSERT INTO "${this.config.tableName}" (`;
+    let query = `INSERT INTO "${this.id}" (`;
     if (columns.length > 0) {
       query = query
         .concat(columns.join(', '), ', data) VALUES (')
         .concat(columns.map((_item, index) => `$${index + 1}`).join(', '), `, $${columns.length + 1});`);
 
-      // @ts-ignore
+      // @ts-expect-error the get method will never return undefined by definition
       values.push(...columns.map(column => this.getField(JSONmember[this.columnToFieldPath.get(column)])));
     } else {
       query = query.concat('data) VALUES ($1);');
@@ -78,8 +86,6 @@ export class PostgresConnector implements IWritableConnector {
    * Table definition:
    *   "id" URI representing the event
    *   "type" URI representing the event type
-   *   "is_version_of" URI for the main object this snapshot represents
-   *   "generated_at" Timestamp generation (value or object[@value])
    *   "data" The rest
    */
   public async provision(): Promise<void> {
@@ -93,25 +99,28 @@ export class PostgresConnector implements IWritableConnector {
 
     this.poolClient = await this.pool.connect();
 
-    let query = `CREATE TABLE IF NOT EXISTS "${this.config.tableName}" (id SERIAL PRIMARY KEY`;
+    let query = `CREATE TABLE IF NOT EXISTS "${this.id}" (id SERIAL PRIMARY KEY`;
 
     this.shape?.forEach(field => {
-      let slugField = this.extractAndSlug(field.path);
+      const slugField = PostgresConnector.extractAndSlug(field.path);
+      console.log('datatype :', field.path, field.datatype);
       this.columnToFieldPath.set(slugField, field.path);
-      query = query.concat(`, ${slugField} ${dataTypes.get(this.extractAndSlug(field.datatype) ?? 'TEXT')}`);
+      query = query.concat(
+        `, ${slugField} ${dataTypes.get(PostgresConnector.extractAndSlug(field.datatype)) ?? 'TEXT'}`
+      );
     });
 
-    query = query.concat(', data JSONB NOT NULL);');
+    query = query.concat(`, data ${PostgresDataType.JSONB} NOT NULL);`);
 
-    // console.debug('Creation table query', query);
-    // console.debug("Paths:", [this.columnToFieldPath.values()])
+    // Console.debug('Creation table query', query);
+    // Console.debug("Paths:", [this.columnToFieldPath.values()])
 
     await this.pool.query(query);
   }
 
-  private extractAndSlug(value: string): string {
-    const reg = /([^#\/]+$)/gm;
-    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/g, lower: true, replacement: '_' });
+  private static extractAndSlug(value: string): string {
+    const reg = /([^#/]+$)/gmu;
+    return slugify(value.match(reg)![0], { remove: /[!"'()*+./:@~]/gu, lower: true, replacement: '_' });
   }
 
   /**
@@ -131,7 +140,7 @@ export class PostgresConnector implements IWritableConnector {
       return null;
     }
 
-    // if(datatype === PostgresDataType.TIMESTAMP){
+    // If(datatype === PostgresDataType.TIMESTAMP){
     //   return new Date(value)
     // }
 

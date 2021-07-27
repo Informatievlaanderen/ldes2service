@@ -23,20 +23,24 @@
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
   "dependencies": {
-    "@ldes/types": "^0.0.0",
-    "@ldes/ldes-redis-state": "^0.0.0",
-    "@ldes/ldes-postgres-connector": "^0.0.0",
     "@comunica/core": "~1.19.2",
-    "@treecg/actor-init-ldes-client": "^2.3.2",
-    "@types/node-fetch": "^2.5.11",
+    "@ldes/ldes-postgres-connector": "^0.0.0",
+    "@ldes/ldes-redis-state": "^0.0.0",
+    "@ldes/types": "^0.0.0",
+    "@oclif/command": "^1.8.0",
+    "@oclif/errors": "^1.3.5",
+    "@treecg/actor-init-ldes-client": "^2.3.4",
+    "@types/node": "^16.4.3",
     "dotenv": "^10.0.0",
+    "execa": "^5.1.1",
     "node-fetch": "^2.6.1",
     "rdf-dereference": "^1.8.0",
     "rdf-store-stream": "^1.2.0",
     "slugify": "^1.6.0"
   },
-  "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
-    "start": "node -r dotenv/config ./bin/ldes-replicator.js"
+  "devDependencies": {
+    "@ldes/types": "^0.0.0",
+    "@types/n3": "^1.10.2",
+    "@types/node-fetch": "^2.5.11"
   }
 }

@@ -1,5 +1,3 @@
-import { LdesShape } from './LdesShape';
-
 export interface IWritableConnector {
   /**
    * Writes a version to the corresponding backend system
@@ -17,3 +15,10 @@ export interface IWritableConnector {
    */
   stop: () => Promise<void>;
 }
+
+export interface IConnectorConfig {
+  type: string;
+  settings: Record<string, any>;
+}
+
+export type ConnectorConfigs = Record<string, IConnectorConfig>;

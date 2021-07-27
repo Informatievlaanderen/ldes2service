@@ -58,6 +58,6 @@
   "dependencies": {
     "dotenv": "^10.0.0",
     "execa": "^5.1.1"
-  }
+  },
   "name": "ldes2service"
 }
