@@ -1,8 +1,7 @@
-import type { IWritableConnector, IConfigConnector } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector, LdesShape } from '@ldes/types';
 import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
-import fetch from 'node-fetch';
-import rdfDereferencer from 'rdf-dereference';
+import slugify from 'slugify';
 
 export interface IConfigMongoDbConnector extends IConfigConnector {
   username: string;
@@ -16,9 +15,13 @@ export class MongoDbConnector implements IWritableConnector {
   private readonly config: IConfigMongoDbConnector;
   private client: MongoClient;
   private db: Db;
+  private shape?: LdesShape;
+  private columnToFieldPath: Map<string, string> = new Map();
 
-  public constructor(config: IConfigMongoDbConnector) {
+  public constructor(config: IConfigMongoDbConnector, shape: LdesShape, tableName: string) {
     this.config = config;
+    this.config.tableName = tableName;
+    this.shape = shape;
   }
 
   /**
@@ -30,50 +33,17 @@ export class MongoDbConnector implements IWritableConnector {
 
     // console.log("Member", JSONmember);
 
-    fetch(JSONmember['@id'])
-      .then(res => res.json())
-      .then(async json => {
-        const { quads } = await rdfDereferencer.dereference(json['shacl']['shape']);
-        quads
-          .on('data', quad => console.log('data :', quad))
-          .on('error', error => console.error(error))
-          .on('end', () => console.log('All done!'));
-      });
+    let data: any = {};
 
-    // This needs to become more generic:
-    // @see https://github.com/osoc21/ldes2service/issues/20
-    const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
-
-    // Insert anyway
-    const collection = this.db.collection('ldes');
-    await collection.insertOne({
-      id: JSONmember['@id'],
-      type: JSONmember['@type'],
-      generated_at: new Date(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
-      is_version_of: isVersionOf,
-      data: member,
+    Array.from(this.columnToFieldPath.keys()).forEach(key => {
+      // @ts-ignore
+      data[key] = JSONmember[this.columnToFieldPath.get(key)];
     });
 
-    // Do we need to delete the others?
-    if (this.config.amountOfVersions > 0) {
-      // Count amount of versions
-      const results = await collection
-        .find({
-          is_version_of: isVersionOf,
-        })
-        .sort({ generated_at: 1 })
-        .toArray();
+    data[data] = member;
 
-      // If more than amountOfVersions
-      // delete te oldest
-      const numberToDelete = results.length - this.config.amountOfVersions;
-
-      if (numberToDelete > 0) {
-        const idsToRemove = results.slice(0, numberToDelete).map((value: any) => value._id);
-
-        await collection.deleteMany({ _id: { $in: idsToRemove } });
-      }
-    }
+    const collection = this.db.collection(this.config.tableName);
+    await collection.insertOne(data);
   }
 
   /**
@@ -83,6 +53,11 @@ export class MongoDbConnector implements IWritableConnector {
     const url = this.getURI();
 
     this.client = new MongoClient(url);
+
+    this.shape?.forEach(field => {
+      let slugField = this.extractAndSlug(field.path);
+      this.columnToFieldPath.set(slugField, field.path);
+    });
 
     // Connect the client to the server
     await this.client.connect();
@@ -96,6 +71,11 @@ export class MongoDbConnector implements IWritableConnector {
 
     //return `mongodb://${config.username}:${config.password}@${config.hostname}:${config.port}/${config.database}`;
     return 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false';
+  }
+
+  private extractAndSlug(value: string): string {
+    const reg = /([^#\/]+$)/gm;
+    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/g, lower: true, replacement: '_' });
   }
 
   /**
