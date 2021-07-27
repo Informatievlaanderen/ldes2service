@@ -28,7 +28,7 @@ const POLL_INTERVAL = Number.parseInt(process.env.pollingInterval ?? '5000', 10)
  */
 async function fetchShape(ldesURI: string): Promise<LdesShape> {
   const {LDESquads} = await rdfDereferencer.dereference(ldesURI);
-  var shapeURL = "";
+  let shapeURL = "";
   for (let quad of LDESquads) {
     if (quad.subject.value === ldesURI && quad.predicate.value === 'https://w3id.org/tree#shape') {
       //TODO: detect if this is a blank node. If it is, we’ll need to extract the shape from the current page instead!
