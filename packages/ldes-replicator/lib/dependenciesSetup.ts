@@ -8,7 +8,7 @@ export async function dependenciesSetup(config: any): Promise<void> {
 
   for (const con of neededConnectors) {
     console.log(`Adding ${con}...`);
-    await execa('lerna', ['add', con, '--scope=@ldes/replicator']);
+    await execa('npm', ['run', 'lerna', '--', 'add', con, '--scope=@ldes/replicator']);
   }
   if (neededConnectors.filter(el => !LDES_CONNECTORS.has(el)).length === 0) {
     console.log('Skipping install...');
