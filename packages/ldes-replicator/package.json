@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@comunica/core": "~1.19.2",
-    "@ldes/ldes-postgres-connector": "^0.0.0",
     "@ldes/ldes-redis-state": "^0.0.0",
     "@ldes/types": "^0.0.0",
     "@oclif/command": "^1.8.0",

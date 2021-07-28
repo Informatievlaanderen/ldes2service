@@ -8,7 +8,7 @@
     "node": ">=14.0"
   },
   "scripts": {
-    "start": "cd packages/ldes-replicator && npm run start",
+    "start": "node ./packages/ldes-replicator/bin/ldes-replicator.js",
     "build-changed": "lerna run build --since HEAD",
     "build": "npm run build:ts",
     "build:ts": "tsc",

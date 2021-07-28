@@ -11,9 +11,9 @@
     ],
     "state": {
       "id": "replicator",
-      "host": "localhost",
-      "polling_interval": 5000
-    }
+      "host": "localhost"
+    },
+    "polling_interval": 5000
   },
   "connectors": {
     "PG": {
