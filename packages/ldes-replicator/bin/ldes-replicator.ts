@@ -40,25 +40,25 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
 
   // This is the store with shacl quads
   let store;
-  
+
   // Console.debug('ldesQuads :', ldesQuads);
   if (!shapeURI) {
     const storeQuads = await storeStream(ldesQuads);
     // Console.debug('storeQuads :', storeQuads);
-    
+
     storeQuads
       // @ts-expect-error the method exists
       .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'))
       .forEach((quad: any) => {
-        if (quad.object.termType === 'BlankNode')
-          store = storeQuads;
-        else if (quad.object.termType === 'NamedNode')
-          shapeURI = quad.object.value;
+        if (quad.object.termType === 'BlankNode') store = storeQuads;
+        else if (quad.object.termType === 'NamedNode') shapeURI = quad.object.value;
       });
   }
-  
+
   if (!shapeURI && !store) {
-    throw new Error('No shape was found for this LDES URI');
+    //TODO: what should happen when no shape at all was found?
+    console.error('No shape was found for this LDES URI');
+    return [];
   }
 
   if (!store) {
