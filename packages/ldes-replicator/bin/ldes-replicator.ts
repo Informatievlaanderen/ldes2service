@@ -38,24 +38,33 @@ interface IReplicatorConfig {
 async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<LdesShape> {
   const { quads: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
 
+  // This is the store with shacl quads
+  let store;
+  
   // Console.debug('ldesQuads :', ldesQuads);
   if (!shapeURI) {
     const storeQuads = await storeStream(ldesQuads);
     // Console.debug('storeQuads :', storeQuads);
-
+    
     storeQuads
       // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://w3id.org/tree#shape'))
-      .forEach((quad: any) => (shapeURI = quad.object.value));
+      .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'))
+      .forEach((quad: any) => {
+        if (quad.object.termType === 'BlankNode')
+          store = storeQuads;
+        else if (quad.object.termType === 'NamedNode')
+          shapeURI = quad.object.value;
+      });
+  }
+  
+  if (!shapeURI && !store) {
+    throw new Error('No shape was found for this LDES URI');
   }
 
-  if (shapeURI === '') {
-    throw new Error('No shape URL found when derefencing the LDES URI');
+  if (!store) {
+    const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
+    store = await storeStream(shapeQuads);
   }
-
-  const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
-
-  const store = await storeStream(shapeQuads);
 
   const paths = Object.fromEntries(
     store
