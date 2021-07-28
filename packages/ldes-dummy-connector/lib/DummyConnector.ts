@@ -1,4 +1,4 @@
-import type { IConfigConnector, IWritableConnector } from '@ldes/types';
+import type { IConfigConnector, IWritableConnector, LdesShape } from '@ldes/types';
 
 export class DummyConnector implements IWritableConnector {
   private readonly members: any[];
@@ -10,8 +10,10 @@ export class DummyConnector implements IWritableConnector {
 
   public static helmTemplate = ``;
 
-  public constructor(config: IConfigConnector) {
+  public constructor(config: IConfigConnector, shape: LdesShape, id: string) {
     this.members = [];
+    console.log('Shape:');
+    console.dir(shape);
   }
 
   /**
