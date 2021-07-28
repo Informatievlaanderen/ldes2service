@@ -8,7 +8,7 @@ import { RedisState } from '@ldes/ldes-redis-state';
 import type { ConnectorConfigs, LdesObjects, LdesShape } from '@ldes/types';
 import { Command, flags } from '@oclif/command';
 import { newEngine } from '@treecg/actor-init-ldes-client';
-import { DataFactory } from 'n3';
+import { DataFactory, Quad, Store } from 'n3';
 import rdfDereferencer from 'rdf-dereference';
 import { storeStream } from 'rdf-store-stream';
 import slugify from 'slugify';
@@ -38,48 +38,50 @@ interface IReplicatorConfig {
 async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<LdesShape> {
   const { quads: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
 
+  // This is the store with shacl quads
+  let store: Store = new Store();
+
   // Console.debug('ldesQuads :', ldesQuads);
   if (!shapeURI) {
-    const storeQuads = await storeStream(ldesQuads);
+    const storeQuads: Store = <Store>await storeStream(ldesQuads);
     // Console.debug('storeQuads :', storeQuads);
 
     storeQuads
-      // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://w3id.org/tree#shape'))
-      .forEach((quad: any) => (shapeURI = quad.object.value));
+      .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'), null, null)
+      .forEach((quad: Quad) => {
+        if (quad.object.termType === 'BlankNode') store = storeQuads;
+        else if (quad.object.termType === 'NamedNode') shapeURI = quad.object.value;
+      });
   }
 
-  if (shapeURI === '') {
-    throw new Error('No shape URL found when derefencing the LDES URI');
+  if (!store) {
+    const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
+    store = <Store>await storeStream(shapeQuads);
   }
-
-  const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
-
-  const store = await storeStream(shapeQuads);
 
   const paths = Object.fromEntries(
     store
-      // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#path'))
-      .map((quad: any) => [quad.subject.value, quad])
+      .getQuads(namedNode(shapeURI), namedNode('https://www.w3.org/ns/shacl#property'), null, null)
+      .map((quad: Quad) => {
+        let shaclpropertyURI = quad.object;
+        return store.getQuads(shaclpropertyURI, namedNode('https://www.w3.org/ns/shacl#path'), null, null)[0];
+      })
+      .map((quad: Quad) => [quad.subject.value, quad])
   );
   const datatypes = Object.fromEntries(
     store
-      // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#datatype'))
-      .map((quad: any) => [quad.subject.value, quad])
+      .getQuads(null, namedNode('https://www.w3.org/ns/shacl#datatype'), null, null)
+      .map((quad: Quad) => [quad.subject.value, quad])
   );
   const nodeKinds = Object.fromEntries(
     store
-      // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#nodeKind'))
-      .map((quad: any) => [quad.subject.value, quad])
+      .getQuads(null, namedNode('https://www.w3.org/ns/shacl#nodeKind'), null, null)
+      .map((quad: Quad) => [quad.subject.value, quad])
   );
   const classes = Object.fromEntries(
     store
-      // @ts-expect-error the method exists
-      .getQuads(undefined, namedNode('https://www.w3.org/ns/shacl#class'))
-      .map((quad: any) => [quad.subject.value, quad])
+      .getQuads(null, namedNode('https://www.w3.org/ns/shacl#class'), null, null)
+      .map((quad: Quad) => [quad.subject.value, quad])
   );
 
   return Object.entries(paths).map(([id, quad]) => ({
