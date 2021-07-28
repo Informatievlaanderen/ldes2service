@@ -5,7 +5,7 @@
   "author": "Wout.Verbiest <wout.verbiest@student.howest.be>",
   "homepage": "https://github.com/osoc21/ldes2service#readme",
   "license": "ISC",
-  "main": "lib/ldes-mongodb-connector.js",
+  "main": "index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
