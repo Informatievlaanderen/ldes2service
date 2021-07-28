@@ -12,6 +12,8 @@ async function setup() {
 
     config.replicator.state = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}');
     config.replicator.polling_interval = Number.parseInt(process.env.POLL_INTERVAL || '5000');
+    
+    config.replicator.urls = process.env.URLS.split(',').map(url => { return { url } });
 
     const connectors = JSON.parse(process.env.CONNECTORS || '[]');
 
