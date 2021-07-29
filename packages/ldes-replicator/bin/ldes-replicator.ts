@@ -41,11 +41,8 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
   // This is the store with shacl quads
   let store: Store = new Store();
 
-  // Console.debug('ldesQuads :', ldesQuads);
   if (!shapeURI) {
     const storeQuads: Store = <Store>await storeStream(ldesQuads);
-    // Console.debug('storeQuads :', storeQuads);
-
     storeQuads
       .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'), null, null)
       .forEach((quad: Quad) => {
@@ -53,8 +50,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
         else if (quad.object.termType === 'NamedNode') shapeURI = quad.object.value;
       });
   }
-
-  if (!store) {
+  if (store.size === 0 && shapeURI) {
     const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
     store = <Store>await storeStream(shapeQuads);
   }
@@ -63,8 +59,8 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
     store
       .getQuads(namedNode(shapeURI), namedNode('https://www.w3.org/ns/shacl#property'), null, null)
       .map((quad: Quad) => {
-        let shaclpropertyURI = quad.object;
-        return store.getQuads(shaclpropertyURI, namedNode('https://www.w3.org/ns/shacl#path'), null, null)[0];
+        let shaclProperty = quad.object;
+        return store.getQuads(shaclProperty, namedNode('https://www.w3.org/ns/shacl#path'), null, null)[0];
       })
       .map((quad: Quad) => [quad.subject.value, quad])
   );
