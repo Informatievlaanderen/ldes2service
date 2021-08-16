@@ -7,4 +7,5 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [reactRefresh()],
+  optimizeDeps : { include : ["@ldes/ldes-mongodb-connector/template", "@ldes/ldes-postgres-connector/template"] }
 });

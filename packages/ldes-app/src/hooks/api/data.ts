@@ -1,6 +1,9 @@
 import { IConnectorService } from '@ldes/types';
-import { template as postgresConnectorTemplate } from '@ldes/ldes-postgres-connector/template';
-import { template as mongodbConnectorTemplate } from '@ldes/ldes-mongodb-connector/template';
+import * as pgTemplate from '@ldes/ldes-postgres-connector/template';
+import * as mongoTemplate from '@ldes/ldes-mongodb-connector/template';
+
+const postgresConnectorTemplate = pgTemplate.template;
+const mongodbConnectorTemplate = mongoTemplate.template;
 
 export const availableConnectors = {
   [postgresConnectorTemplate.name]: postgresConnectorTemplate,
