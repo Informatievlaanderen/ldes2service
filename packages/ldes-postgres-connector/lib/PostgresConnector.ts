@@ -99,11 +99,11 @@ export class PostgresConnector implements IWritableConnector {
 
     this.poolClient = await this.pool.connect();
 
-    let query = `CREATE TABLE IF NOT EXISTS "${this.id}" (id SERIAL PRIMARY KEY`;
+    let query = `CREATE TABLE IF NOT EXISTS "${this.id}" (table_id SERIAL PRIMARY KEY`;
 
     this.shape?.forEach(field => {
       const slugField = PostgresConnector.extractAndSlug(field.path);
-      console.log('datatype :', field.path, field.datatype);
+      // Console.debug('datatype :', field.path, field.datatype);
       this.columnToFieldPath.set(slugField, field.path);
       query = query.concat(
         `, ${slugField} ${dataTypes.get(PostgresConnector.extractAndSlug(field.datatype)) ?? 'TEXT'}`
@@ -112,8 +112,9 @@ export class PostgresConnector implements IWritableConnector {
 
     query = query.concat(`, data ${PostgresDataType.JSONB} NOT NULL);`);
 
-    // Console.debug('Creation table query', query);
-    // Console.debug("Paths:", [this.columnToFieldPath.values()])
+    console.debug('Creation table query', query);
+    // Console.debug('Paths:', [this.columnToFieldPath.values()]);
+    // Console.debug('Shape:', this.shape);
 
     await this.pool.query(query);
   }
@@ -130,8 +131,6 @@ export class PostgresConnector implements IWritableConnector {
     this.poolClient.release();
     return this.pool.end();
   }
-
-  // TODO: port this to other connectors
 
   private getField(property: any, datatype: PostgresDataType): Date | string | null {
     const value: string | undefined = property?.['@value'] ?? property?.['@id'] ?? property;

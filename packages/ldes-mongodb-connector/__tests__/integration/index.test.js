@@ -6,13 +6,30 @@ describe('ldes-mongodb-connector', () => {
   beforeEach(async () => {
     connector = new MongoDbConnector({
       amountOfVersions: 2,
-      databaseName: 'ldes',
       username: 'mongo',
       password: 'mongo',
       database: 'ldes',
       hostname: 'localhost',
       port: 27017
-    });
+    }, [
+      {
+        path: '@id',
+        datatype: 'https://www.w3.org/ns/shacl#IRI',
+      },
+      {
+        path: '@type',
+        datatype: 'https://www.w3.org/ns/shacl#IRI',
+      },
+      {
+        path: 'http://www.w3.org/ns/prov#generatedAtTime',
+        datatype: 'http://www.w3.org/2001/XMLSchema#dateTime',
+      },
+      {
+        path: 'http://purl.org/dc/terms/isVersionOf',
+        datatype: 'https://www.w3.org/ns/shacl#IRI',
+      },
+    ],
+      'ldes');
 
     await connector.provision();
   });
@@ -45,14 +62,14 @@ describe('ldes-mongodb-connector', () => {
         expect.objectContaining({
           id: '1_1',
           type: 'type_1',
-          is_version_of: '1',
-          generated_at: new Date('2021-07-10T11:05:00.000Z'),
+          isversionof: '1',
           data: member,
         }),
       ])
     );
   });
 
+  /* HAS TO BE IMPLEMENTED BACK WITH THE GENERIC APPROACH
   it('should only store the latest 2 versions', async () => {
     const member1 = JSON.stringify({
       '@id': '1_1',
@@ -99,4 +116,5 @@ describe('ldes-mongodb-connector', () => {
       ])
     );
   });
+   */
 });

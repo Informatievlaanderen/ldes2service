@@ -45,10 +45,10 @@ export class MongoDbConnector implements IWritableConnector {
 
     Array.from(this.columnToFieldPath.keys()).forEach(key => {
       // @ts-expect-error get never returns undefined
-      data[key] = JSONmember[this.columnToFieldPath.get(key)];
+      data[key] = this.getField(JSONmember[this.columnToFieldPath.get(key)]);
     });
 
-    data[data] = member;
+    data.data = member;
 
     const collection = this.db.collection(this.id);
     await collection.insertOne(data);
@@ -94,5 +94,15 @@ export class MongoDbConnector implements IWritableConnector {
    */
   public async stop(): Promise<void> {
     await this.client.close();
+  }
+
+  private getField(property: any): string | null {
+    const value: string | undefined = property?.['@value'] ?? property?.['@id'] ?? property;
+
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    return value;
   }
 }

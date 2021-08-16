@@ -26,7 +26,7 @@ export class Orchestrator {
    * Start listening to the events and pipe them to the connectors
    */
   public async run(): Promise<void[]> {
-    console.log('START RUN');
+    console.debug('START RUN');
 
     const runs = Array.from(this.ldesConnectors.keys()).map(ldesObject => {
       const connectors = this.ldesConnectors.get(ldesObject);
@@ -78,7 +78,7 @@ export class Orchestrator {
 
     await Promise.all([state, ...promises]);
 
-    console.log('END PROVISION');
+    console.debug('END PROVISION');
   }
 
   /**

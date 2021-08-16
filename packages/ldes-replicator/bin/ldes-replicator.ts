@@ -8,7 +8,8 @@ import { RedisState } from '@ldes/ldes-redis-state';
 import type { ConnectorConfigs, LdesObjects, LdesShape } from '@ldes/types';
 import { Command, flags } from '@oclif/command';
 import { newEngine } from '@treecg/actor-init-ldes-client';
-import { DataFactory, Quad, Store } from 'n3';
+import type { Quad } from 'n3';
+import { DataFactory, Store } from 'n3';
 import rdfDereferencer from 'rdf-dereference';
 import { storeStream } from 'rdf-store-stream';
 import slugify from 'slugify';
@@ -36,6 +37,16 @@ interface IReplicatorConfig {
  * TODO We might want to catch the fact that possibly the shape is already contained in the received quads.
  */
 async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<LdesShape> {
+  const defaultShape = [
+    {
+      path: '@id',
+      datatype: 'https://www.w3.org/ns/shacl#IRI',
+    },
+    {
+      path: '@type',
+      datatype: 'https://www.w3.org/ns/shacl#IRI',
+    },
+  ];
   const { quads: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
 
   // This is the store with shacl quads
@@ -46,8 +57,11 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
     storeQuads
       .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'), null, null)
       .forEach((quad: Quad) => {
-        if (quad.object.termType === 'BlankNode') store = storeQuads;
-        else if (quad.object.termType === 'NamedNode') shapeURI = quad.object.value;
+        if (quad.object.termType === 'BlankNode') {
+          store = storeQuads;
+        } else if (quad.object.termType === 'NamedNode') {
+          shapeURI = quad.object.value;
+        }
       });
   }
   if (store.size === 0 && shapeURI) {
@@ -59,7 +73,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
     store
       .getQuads(namedNode(shapeURI), namedNode('https://www.w3.org/ns/shacl#property'), null, null)
       .map((quad: Quad) => {
-        let shaclProperty = quad.object;
+        const shaclProperty = quad.object;
         return store.getQuads(shaclProperty, namedNode('https://www.w3.org/ns/shacl#path'), null, null)[0];
       })
       .map((quad: Quad) => [quad.subject.value, quad])
@@ -80,10 +94,12 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
       .map((quad: Quad) => [quad.subject.value, quad])
   );
 
-  return Object.entries(paths).map(([id, quad]) => ({
+  const result = Object.entries(paths).map(([id, quad]) => ({
     path: quad.object.value,
     datatype: datatypes[id]?.object.value ?? nodeKinds[id]?.object.value ?? classes[id]?.object.value,
   }));
+
+  return defaultShape.concat(result);
 }
 
 class LdesReplicator extends Command {
