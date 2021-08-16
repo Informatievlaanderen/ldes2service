@@ -1,22 +1,37 @@
-import type { IWritableConnector, IConfigConnector } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector, LdesShape } from '@ldes/types';
 import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
+import slugify from 'slugify';
 
 export interface IConfigMongoDbConnector extends IConfigConnector {
-  username: string;
+  username?: string;
   hostname: string;
   database: string;
-  password: string;
+  password?: string;
   port: number;
+  connectionString?: string;
+  extraParameters?: string;
 }
+const defaultConfig: IConfigMongoDbConnector = {
+  amountOfVersions: 0,
+  hostname: 'localhost',
+  database: 'admin',
+  port: 27_017,
+  extraParameters: '',
+};
 
 export class MongoDbConnector implements IWritableConnector {
   private readonly config: IConfigMongoDbConnector;
   private client: MongoClient;
   private db: Db;
+  private readonly shape?: LdesShape;
+  private readonly id: string;
+  private readonly columnToFieldPath: Map<string, string> = new Map();
 
-  public constructor(config: IConfigMongoDbConnector) {
-    this.config = config;
+  public constructor(config: IConfigMongoDbConnector, shape: LdesShape, id: string) {
+    this.config = { ...defaultConfig, ...config };
+    this.id = id;
+    this.shape = shape;
   }
 
   /**
@@ -26,40 +41,17 @@ export class MongoDbConnector implements IWritableConnector {
   public async writeVersion(member: any): Promise<void> {
     const JSONmember = JSON.parse(member);
 
-    // This needs to become more generic:
-    // @see https://github.com/osoc21/ldes2service/issues/20
-    const isVersionOf = JSONmember['http://purl.org/dc/terms/isVersionOf']['@id'];
+    const data: any = {};
 
-    // Insert anyway
-    const collection = this.db.collection('ldes');
-    await collection.insertOne({
-      id: JSONmember['@id'],
-      type: JSONmember['@type'],
-      generated_at: new Date(JSONmember['http://www.w3.org/ns/prov#generatedAtTime']),
-      is_version_of: isVersionOf,
-      data: member,
+    Array.from(this.columnToFieldPath.keys()).forEach(key => {
+      // @ts-expect-error get never returns undefined
+      data[key] = this.getField(JSONmember[this.columnToFieldPath.get(key)]);
     });
 
-    // Do we need to delete the others?
-    if (this.config.amountOfVersions > 0) {
-      // Count amount of versions
-      const results = await collection
-        .find({
-          is_version_of: isVersionOf,
-        })
-        .sort({ generated_at: 1 })
-        .toArray();
+    data.data = member;
 
-      // If more than amountOfVersions
-      // delete te oldest
-      const numberToDelete = results.length - this.config.amountOfVersions;
-
-      if (numberToDelete > 0) {
-        const idsToRemove = results.slice(0, numberToDelete).map((value: any) => value._id);
-
-        await collection.deleteMany({ _id: { $in: idsToRemove } });
-      }
-    }
+    const collection = this.db.collection(this.id);
+    await collection.insertOne(data);
   }
 
   /**
@@ -70,6 +62,11 @@ export class MongoDbConnector implements IWritableConnector {
 
     this.client = new MongoClient(url);
 
+    this.shape?.forEach(field => {
+      const slugField = MongoDbConnector.extractAndSlug(field.path);
+      this.columnToFieldPath.set(slugField, field.path);
+    });
+
     // Connect the client to the server
     await this.client.connect();
 
@@ -78,9 +75,18 @@ export class MongoDbConnector implements IWritableConnector {
   }
 
   private getURI(): string {
-    const config = this.config;
+    const conf = this.config;
+    const auth = conf.username && conf.password ? `${conf.username}:${conf.password}@` : '';
 
-    return `mongodb://${config.username}:${config.password}@${config.hostname}:${config.port}/${config.database}`;
+    return (
+      conf.connectionString ??
+      `mongodb://${auth}${conf.hostname}:${conf.port}/${conf.database}${conf.extraParameters}`
+    );
+  }
+
+  private static extractAndSlug(value: string): string {
+    const reg = /([^#/]+$)/gmu;
+    return slugify(value.match(reg)![0], { remove: /[*+~.()'"!:@/]/gu, lower: true, replacement: '_' });
   }
 
   /**
@@ -88,5 +94,15 @@ export class MongoDbConnector implements IWritableConnector {
    */
   public async stop(): Promise<void> {
     await this.client.close();
+  }
+
+  private getField(property: any): string | null {
+    const value: string | undefined = property?.['@value'] ?? property?.['@id'] ?? property;
+
+    if (value === undefined || value === null) {
+      return null;
+    }
+
+    return value;
   }
 }

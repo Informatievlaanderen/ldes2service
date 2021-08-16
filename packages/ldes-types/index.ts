@@ -5,3 +5,4 @@ export * from './lib/IConfigConnector';
 export * from './lib/IConnectorService';
 export * from './lib/IConfigTemplate';
 export * from './lib/IGeneratorApiSetup';
+export * from './lib/LdesShape';

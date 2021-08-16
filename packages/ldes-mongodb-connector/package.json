@@ -29,8 +29,12 @@
   },
   "dependencies": {
     "@ldes/types": "^0.0.0",
+    "@types/node-fetch": "^2.5.11",
     "jsonld": "^5.2.0",
     "mongodb": "^3.6.8",
-    "mongoose": "^5.13.2"
+    "mongoose": "^5.13.2",
+    "node-fetch": "^2.6.1",
+    "rdf-dereference": "^1.8.0",
+    "slugify": "^1.6.0"
   }
 }

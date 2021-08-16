@@ -1,27 +1,31 @@
-const execa = require('execa');
+//Create config.json.example from ENV VARS
+const fs = require('fs/promises');
 
-const CONNECTORS = JSON.parse(process.env.CONNECTORS || '[]');
+async function setup() {
+  try {
+    return await fs.access('./config.json', 4);
+  } catch {
+    const config = {
+      connectors: {},
+      replicator: {},
+    }
 
-const LDES_CONNECTORS = ['@ldes/ldes-postgres-connector', '@ldes/ldes-mongodb-connector'];
+    config.replicator.state = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}');
+    config.replicator.polling_interval = Number.parseInt(process.env.POLL_INTERVAL || '5000');
 
-const neededConnectors = [];
+    config.replicator.ldes = process.env.URLS.split(',').map(url => { return { url } });
 
-async function run() {
-  for (const con of CONNECTORS) {
-    const cmd = process.env[`CONNECTOR_${con}_TYPE`];
-    console.log(`Adding ${cmd}...`);
-    neededConnectors.push(cmd);
-    await execa('lerna', ['add', cmd, '--scope=@ldes/replicator']);
+    const connectors = JSON.parse(process.env.CONNECTORS || '[]');
+
+    for (let con of connectors) {
+      config.connectors[con] = {
+        type: process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector',
+        settings: JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}'),
+      }
+    }
+    console.log('Config file created:', config);
+    await fs.writeFile('./config.json', JSON.stringify(config, null, 2), 'utf8');
   }
-  if (neededConnectors.filter(el => !LDES_CONNECTORS.includes(el)).length === 0) {
-    console.log('Skipping install...');
-    return;
-  }
-  console.log('Installing dependencies...');
-  const install = execa('npm', ['i']);
-  install.stdout.pipe(process.stdout);
-  install.stderr.pipe(process.stderr);
-  await install;
 }
 
-run().catch(error => console.error(error))
+setup().catch(error => console.error(error));
