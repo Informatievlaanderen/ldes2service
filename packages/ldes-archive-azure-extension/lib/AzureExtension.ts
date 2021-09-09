@@ -31,7 +31,7 @@ export class AzureExtension implements IArchiveExtension {
       .then(files => {
         files.forEach(async file => {
           const blockBlobClient = this.containerClient.getBlockBlobClient(`${entity}/${file}`);
-          const absoluteFilePath = path.resolve(`data/${entity}`, file);
+          const absoluteFilePath = path.resolve(`${this.temporaryOutputDirectory}/${entity}`, file);
           await blockBlobClient.uploadFile(absoluteFilePath);
           await this.removeFile(absoluteFilePath);
         });
@@ -43,10 +43,4 @@ export class AzureExtension implements IArchiveExtension {
   private async removeFile(filePath: string): Promise<void> {
     await unlink(filePath);
   }
-
-  // TODO: move  this to Archive
-  /*
-    private async getDirectorySize(): Promise<number> {
-    return await getFolderSize.loose(this.temporaryOutputDirectory);
-  }*/
 }
