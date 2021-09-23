@@ -22,7 +22,9 @@ export class AzureExtension implements IArchiveExtension {
 
     const exists = await this.containerClient.exists();
     if (!exists) {
-      throw new Error(`[AzureExtension]: It seems that the container with name '${this.containerName}' does not exist. Please create it.`);
+      throw new Error(
+        `[AzureExtension]: It seems that the container with name '${this.containerName}' does not exist. Please create it.`
+      );
     }
   }
 
@@ -35,7 +37,8 @@ export class AzureExtension implements IArchiveExtension {
           await blockBlobClient.uploadFile(absoluteFilePath);
           await this.removeFile(absoluteFilePath);
         });
-      }).catch(error => {
+      })
+      .catch(error => {
         throw new Error(error.stack);
       });
   }

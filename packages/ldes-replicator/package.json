@@ -22,6 +22,10 @@
   "bugs": {
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
+  "scripts": {
+    "build": "npm run build:ts",
+    "build:ts": "tsc"
+  },
   "dependencies": {
     "@comunica/core": "~1.19.2",
     "@ldes/ldes-redis-state": "^0.0.0",
@@ -40,6 +44,7 @@
   "devDependencies": {
     "@ldes/types": "^0.0.0",
     "@types/n3": "^1.10.2",
-    "@types/node-fetch": "^2.5.11"
+    "@types/node-fetch": "^2.5.11",
+    "typescript": "^4.4.3"
   }
 }

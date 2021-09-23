@@ -21,13 +21,15 @@
     "url": "git+https://github.com/Informatievlaanderen/ldes2service.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "npm run build:ts",
+    "build:ts": "tsc"
   },
   "bugs": {
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
   "devDependencies": {
-    "@ldes/types": "^0.0.0"
+    "@ldes/types": "^0.0.0",
+    "typescript": "^4.4.3"
   },
   "dependencies": {
     "@types/pg": "^8.6.0",

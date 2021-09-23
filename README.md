@@ -222,9 +222,10 @@ releases:
 
 ## License
 
-This project is released as an open-source project under the [MIT License](https://github.com/osoc21/ldes2service/blob/main/LICENSE)
-=======
+# This project is released as an open-source project under the [MIT License](https://github.com/osoc21/ldes2service/blob/main/LICENSE)
+
 node packages/ldes-replicator/bin/ldes-replicator.js
+
 ```
 
 ## Writing your own connector
@@ -232,3 +233,4 @@ node packages/ldes-replicator/bin/ldes-replicator.js
 See the example in https://github.com/Informatievlaanderen/ldes2service/tree/main/packages/ldes-dummy-connector
 
 ## Running it with Docker
+```

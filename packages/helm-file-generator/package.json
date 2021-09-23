@@ -17,7 +17,8 @@
     "url": "git+https://github.com/osoc21/ldes2service.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "npm run build:ts",
+    "build:ts": "tsc"
   },
   "bugs": {
     "url": "https://github.com/osoc21/ldes2service/issues"
@@ -27,6 +28,7 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@ldes/types": "^0.0.0"
+    "@ldes/types": "^0.0.0",
+    "typescript": "^4.4.3"
   }
 }
