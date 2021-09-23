@@ -13,7 +13,7 @@ program
   .requiredOption('--outputDir <dir>', 'Directory to write the (temporary) output to')
   .option(
     '--extension <extension>',
-    'Set the name of the extension. For the moment only "azure" is supported',
+    'Set the name of the extension. For the moment only "azure" is supported'
   )
   .option('--connectionString <cs>', 'Azure connection string to connect to the storage account')
   .option('--container <name>', 'Name of the Azure Storage Container where data will be written to')
@@ -45,7 +45,7 @@ const run = async (_options: OptionValues): Promise<void> => {
     extensionOptions.containerName === undefined
   ) {
     throw new Error(
-      `[Archiver]: Please provide a connection string and container name if your want to use an extension.`,
+      `[Archiver]: Please provide a connection string and container name if your want to use an extension.`
     );
   }
 
@@ -64,14 +64,14 @@ const run = async (_options: OptionValues): Promise<void> => {
 const getExtension = (
   extension: string,
   outputDirectory: string,
-  extensionOptions: IExtensionOptions,
+  extensionOptions: IExtensionOptions
 ): IArchiveExtension => {
   switch (extension) {
     case 'azure':
       return new AzureExtension(
         extensionOptions.connectionString,
         extensionOptions.containerName,
-        outputDirectory,
+        outputDirectory
       );
     default:
       throw new Error(`[Archiver]: Please provide a valid extension.`);

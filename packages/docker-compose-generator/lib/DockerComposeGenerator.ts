@@ -46,7 +46,7 @@ export class DockerComposeGenerator {
   private static replicatorSetup(
     dockerFile: IComposeFile,
     services: Record<string, any>,
-    replicator: Record<string, any>,
+    replicator: Record<string, any>
   ): IComposeFile {
     if (replicator.redis) {
       replicator.state = {
@@ -80,7 +80,7 @@ export class DockerComposeGenerator {
     for (const con of CONNECTORS) {
       ldesReplicator.replicator.environment[`CONNECTOR_${con}_TYPE`] = services[con].type;
       ldesReplicator.replicator.environment[`CONNECTOR_${con}_CONFIG`] = JSON.stringify(
-        services[con].settings,
+        services[con].settings
       );
     }
 

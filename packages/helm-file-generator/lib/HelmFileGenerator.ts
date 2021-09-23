@@ -35,7 +35,7 @@ export class HelmFileGenerator {
   private static replicatorSetup(
     HelmFile: IHelmFile,
     services: Record<string, any>,
-    replicator: Record<string, any>,
+    replicator: Record<string, any>
   ): IHelmFile {
     if (replicator.redis) {
       replicator.state = {

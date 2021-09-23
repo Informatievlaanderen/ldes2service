@@ -17,8 +17,8 @@
     "url": "git+https://github.com/Informatievlaanderen/ldes2service.git"
   },
   "scripts": {
-    "build" : "npm run build:ts",
-    "build:ts" : "tsc"
+    "build": "npm run build:ts",
+    "build:ts": "tsc"
   },
   "bugs": {
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"

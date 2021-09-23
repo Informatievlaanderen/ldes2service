@@ -14,7 +14,7 @@ export function generatorSetup(body: IGeneratorApiSetup[]): void {
 
 const GeneratorRoute: FastifyPluginAsync = async (
   server: FastifyInstance,
-  options: IGeneratorPluginOptions,
+  options: IGeneratorPluginOptions
 ) => {
   const prefix = options.prefix?.replace(/\/$/gu, '') || '';
 
@@ -39,7 +39,7 @@ const GeneratorRoute: FastifyPluginAsync = async (
       async (_request: any, _reply: any) => {
         generatorSetup(_request.body);
         _reply.send('Generators updated.');
-      },
+      }
     );
   }
 
@@ -73,7 +73,7 @@ const GeneratorRoute: FastifyPluginAsync = async (
         default:
           _reply.send('No file type was selected!');
       }
-    },
+    }
   );
 };
 
