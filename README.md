@@ -13,6 +13,7 @@ A Linked Data Event Stream (LDES) is a collection of immutable objects. The HTTP
 ```bash
 npm install
 npm run build
+<<<<<<< HEAD
 cd packages/ldes-replicator && npm run start
 ```
 
@@ -21,7 +22,6 @@ cd packages/ldes-replicator && npm run start
 **ldes-dummy-connector:**<br />
 An example to write your own connector.
 
-**ldes-postgres-connector:**<br />
 A connector implementation for PostgreSQL.
 
 **ldes-mongodb-connector:**<br />
@@ -224,3 +224,12 @@ releases:
 ## License
 
 This project is released as an open-source project under the [MIT License](https://github.com/osoc21/ldes2service/blob/main/LICENSE)
+=======
+node packages/ldes-replicator/bin/ldes-replicator.js
+```
+
+## Writing your own connector
+
+See the example in https://github.com/Informatievlaanderen/ldes2service/tree/main/packages/ldes-dummy-connector
+
+## Running it with Docker
