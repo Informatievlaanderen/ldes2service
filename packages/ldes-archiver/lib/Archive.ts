@@ -6,15 +6,12 @@ import { DataFactory } from 'rdf-data-factory';
 import { helpers } from './utils/Helpers';
 
 const BYTE_THRESHOLD = 50_000;
-const factory = new DataFactory();
-
-const timestampProperty: RDF.NamedNode = factory.namedNode('http://www.w3.org/ns/prov#generatedAtTime');
-const versionOfProperty: RDF.NamedNode = factory.namedNode('http://purl.org/dc/terms/isVersionOf');
 
 export interface IArchiveOptions {
   outputDirectory: string;
   url: string;
-  extension?: string;
+  timestampPredicate: string;
+  extension?: IArchiveExtension;
 }
 
 export interface IExtensionOptions {
@@ -22,30 +19,31 @@ export interface IExtensionOptions {
   containerName: string;
 }
 
-// TODO: check if this still works for the extensions
 export class Archive implements IWritableConnector {
-  private readonly outputDirectory: string;
-  private readonly extension: IArchiveExtension;
+  public readonly outputDirectory: string;
+  public readonly extension: IArchiveExtension;
+  public readonly timestampProperty: RDF.NamedNode;
 
-  private byteCounter: number;
-  private numberOfNoWrites: number;
-  private wroteToFileInInterval: boolean;
+  public readonly factory: RDF.DataFactory;
+  public readonly bucketPredicate: RDF.NamedNode;
 
-  public constructor(outputDirectory: string, extension?: IArchiveExtension | undefined) {
+  public constructor(
+    outputDirectory: string,
+    timestampPredicate: string,
+    extension?: IArchiveExtension | undefined,
+  ) {
+    this.factory = new DataFactory();
     this.outputDirectory = outputDirectory;
-    this.byteCounter = 0;
-    this.numberOfNoWrites = 0;
-    this.wroteToFileInInterval = false;
+    this.timestampProperty = this.factory.namedNode(timestampPredicate);
+    this.bucketPredicate = this.factory.namedNode('https://w3id.org/ldes#bucket');
 
     if (extension) {
       this.extension = extension!;
-      this.startInterval();
     }
   }
 
   public stop = async (): Promise<void> => {
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(1);
+    throw new Error(`Not implemented.`);
   };
 
   public async provision(): Promise<void> {
@@ -56,107 +54,72 @@ export class Archive implements IWritableConnector {
     }
   }
 
-  public async writeVersion(member: any): Promise<void> {
-    const [timestamp, entityIdentifier] = this.processQuads(member.quads);
-
-    if (!timestamp || !entityIdentifier) {
-      console.error(`[Archiver]: timestamp or entityIdentifier is not present.`);
-      // eslint-disable-next-line unicorn/no-process-exit
-      process.exit(1);
+  public async writeVersion(quads: RDF.Quad[]): Promise<void> {
+    const versionFileName = this.getTimestampFilename(quads);
+    if (!versionFileName) {
+      throw new Error(`[Archive]: Could not create a filename based on object of timestamp property.`);
     }
+    const bucketTriples = this.getBucketTriples(quads);
 
-    await this.writeToDirectory(entityIdentifier, timestamp, member.quads);
-    this.wroteToFileInInterval = true;
+    if (bucketTriples.length > 0) {
+      bucketTriples.forEach(async triple => {
+        const bucket = triple.object.value;
+        const bucketPath = `${this.outputDirectory}/${bucket}`;
+        quads = quads.filter(quad => !bucketTriples.includes(quad));
+
+        try {
+          await helpers.directoryExists(bucketPath);
+        } catch {
+          await helpers.createDirectory(bucketPath);
+        }
+
+        await this.writeToBucket(bucketPath, versionFileName, quads);
+      });
+    } else {
+      await this.writeToBucket(this.outputDirectory, versionFileName, quads);
+    }
   }
 
-  private async writeToDirectory(entity: string, timestamp: string, quads: RDF.Quad[]): Promise<void> {
-    const entityPath = `${this.outputDirectory}/${entity}`;
-    const versionPath = `${entityPath}/${timestamp}.ttl`;
+  public flush = async (): Promise<void> => {
+    if (this.extension !== undefined) {
+      const files = await readdir(this.outputDirectory);
 
-    try {
-      await helpers.directoryExists(entityPath);
-    } catch {
-      console.log(`[Archive]: Directory for entity ${entity} does not exist yet and will be created.`);
-      await helpers.createDirectory(entityPath);
+      if (files.length > 0) {
+        const tasks: Promise<void>[] = [];
+
+        files.forEach(file => {
+          tasks.push(this.extension.pushToStorage(file));
+        });
+
+        await Promise.all(tasks);
+      }
     }
+  };
+
+  private readonly getBucketTriples = (quads: RDF.Quad[]): RDF.Quad[] =>
+    quads.filter(quad => quad.predicate.equals(this.bucketPredicate));
+
+  private readonly getTimestampFilename = (quads: RDF.Quad[]): string => {
+    let timestamp = '';
+    quads.forEach(quad => {
+      if (quad.predicate.equals(this.timestampProperty)) {
+        timestamp = quad.object.value;
+      }
+    });
+
+    return timestamp.replace(/[:-]/gu, '').replace(/[.]/gu, '_');
+  };
+
+  private readonly writeToBucket = async (bucketPath: string, filename: string, quads: RDF.Quad[]): Promise<void> => {
+    const versionPath = `${bucketPath}/${filename}.ttl`;
 
     const writer = new N3.Writer();
     writer.addQuads(quads);
     writer.end(async (error, result) => {
       if (error) {
-        console.log(error);
+        throw new Error(error.stack);
       }
-
-      // TODO: check if this still works for the extensions
-      const bytes = Buffer.from(result.toString()).byteLength;
-      this.byteCounter += bytes;
       await helpers.writeToFile(versionPath, result);
     });
-  }
-
-  private readonly processQuads = (quads: RDF.Quad[]): string[] => {
-    let timestamp;
-    let entityIdentifier;
-
-    quads.forEach((quad: RDF.Quad) => {
-      if (quad.predicate.equals(timestampProperty)) {
-        timestamp = this.getTimestampForFilename(quad);
-      }
-
-      if (quad.predicate.equals(versionOfProperty)) {
-        entityIdentifier = this.getEntityId(quad);
-        console.log(entityIdentifier);
-      }
-    });
-
-    return [timestamp || '', entityIdentifier || ''];
   };
-
-  private startInterval(): void {
-    setInterval(async () => {
-      if (this.byteCounter >= BYTE_THRESHOLD || this.numberOfNoWrites >= 10) {
-        const files = await readdir(this.outputDirectory);
-
-        if (files.length > 0) {
-          const tasks: Promise<void>[] = [];
-
-          files.forEach(file => {
-            tasks.push(this.extension.pushToStorage(file));
-          });
-
-          await Promise.all(tasks);
-
-          if (tasks.length > 0) {
-            console.log(`[Archive]: All files in ${this.outputDirectory} were uploaded to extension.`);
-          }
-        }
-
-        this.reset();
-      }
-
-      if (!this.wroteToFileInInterval) {
-        console.log(`[Archive]: No version received during this interval.`);
-        this.numberOfNoWrites++;
-      }
-      this.wroteToFileInInterval = false;
-    }, 10_000);
-  }
-
-  private reset(): void {
-    console.log(`[Archive]: Resetting byte counter and number of no writes counter.`);
-    this.byteCounter = 0;
-    this.numberOfNoWrites = 0;
-  }
-
-  private getTimestampForFilename(quad: RDF.Quad): string {
-    const time = quad.object.value;
-    const timestamp = time.replace(/[:-]/gu, '');
-    return timestamp.replace(/[.]/gu, '_');
-  }
-
-  private getEntityId(quad: RDF.Quad): string {
-    const uri: string = quad.object.value;
-    const parts = uri.split('/');
-    return parts[parts.length - 1];
-  }
 }

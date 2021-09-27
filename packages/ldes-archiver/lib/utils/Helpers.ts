@@ -1,10 +1,13 @@
 import { mkdir, access, writeFile } from 'fs/promises';
+import { AzureExtension } from '@ldes/archive-azure-extension';
+import { SubjectPageBucketizer } from '@ldes/subject-page-bucketizer';
+import type { IArchiveExtension, IBucketizer } from '@ldes/types';
 import { formatISO } from 'date-fns';
+import type { IExtensionOptions } from '../Archive';
 
 export class Helpers {
   // User should be able to define a path outside this package
   public createDirectory(path: string): Promise<string | undefined> {
-    console.log(`Creating path: ${path}`);
     return mkdir(path, { recursive: true });
   }
 
@@ -20,6 +23,32 @@ export class Helpers {
   public writeToFile(path: string, data: any): Promise<void> {
     return writeFile(path, data);
   }
+
+  public getExtension = (
+    extension: string,
+    outputDirectory: string,
+    extensionOptions: IExtensionOptions,
+  ): IArchiveExtension => {
+    switch (extension) {
+      case 'azure':
+        return new AzureExtension(
+          extensionOptions.connectionString,
+          extensionOptions.containerName,
+          outputDirectory,
+        );
+      default:
+        throw new Error(`[Archiver]: Please provide a valid extension.`);
+    }
+  };
+
+  public getBucketizer = (bucketizer: string, timestampPredicate: string): IBucketizer => {
+    switch (bucketizer) {
+      case 'subject-pages':
+        return new SubjectPageBucketizer(timestampPredicate);
+      default:
+        throw new Error(`[Archiver]: Please provide a valid bucketizer strategy.`);
+    }
+  };
 }
 
 export const helpers = new Helpers();
