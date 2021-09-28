@@ -1,6 +1,6 @@
 {
   "name": "@ldes/subject-page-bucketizer",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "> TODO: description",
   "author": "Dwight Van Lancker <dwight.vanlancker@hotmail.com>",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
@@ -25,7 +25,7 @@
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
   "dependencies": {
-    "@ldes/types": "^0.0.0",
+    "@ldes/types": "^0.0.1",
     "@rdfjs/types": "^1.0.1",
     "rdf-data-factory": "^1.1.0"
   }

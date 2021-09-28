@@ -2,8 +2,6 @@ import type { IBucketizer } from '@ldes/types';
 import type * as RDF from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
 
-// TODO: what with version materialized triples and if the graph is set?
-
 export class SubjectPageBucketizer implements IBucketizer {
   public factory: RDF.DataFactory;
   public versionOfProperty: RDF.NamedNode;
