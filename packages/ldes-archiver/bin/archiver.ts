@@ -1,6 +1,4 @@
-import { SubjectPageBucketizer } from '@ldes/subject-page-bucketizer';
-import type { IArchiveExtension } from '@ldes/types';
-import { IBucketizer } from '@ldes/types';
+import type { IArchiveExtension, IBucketizer } from '@ldes/types';
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import type { OptionValues } from 'commander';
 import { Command } from 'commander';
@@ -23,7 +21,11 @@ program
   .option(
     '-v, --versionOfPredicate <predicate>',
     'Indicating the non-version object. Default "http://purl.org/dc/terms/isVersionOf"',
-    'http://purl.org/dc/terms/isVersionOf'
+    'http://purl.org/dc/terms/isVersionOf',
+  )
+  .option(
+    '-s, --substringPredicate <predicate>',
+    'Indicating on which predicate the substring fragmentation should be applied.',
   )
   .option(
     '--extension <extension>',
@@ -63,7 +65,7 @@ const run = async (_options: OptionValues): Promise<void> => {
 
   let bucketizer: IBucketizer;
   if (_options.bucketizer) {
-    bucketizer = helpers.getBucketizer(_options.bucketizer, _options.versionOfPredicate);
+    bucketizer = helpers.getBucketizer(_options.bucketizer, _options.versionOfPredicate, _options.substringPredicate);
   }
 
   const LDESClient = newEngine();
@@ -76,7 +78,7 @@ const run = async (_options: OptionValues): Promise<void> => {
   const ldes = LDESClient.createReadStream(archiveOptions.url, ldesOptions);
   ldes.on('data', async member => {
     if (bucketizer) {
-      bucketizer.bucketize(member.quads);
+      bucketizer.bucketize(member.quads, member.id);
     }
 
     await archive.writeVersion(member.quads);

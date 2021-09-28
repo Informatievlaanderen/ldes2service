@@ -13,8 +13,8 @@ export class SubjectPageBucketizer implements IBucketizer {
     this.versionOfProperty = this.factory.namedNode(versionOfPredicate);
   }
 
-  public bucketize = (quads: RDF.Quad[]): void => {
-    const [entityIdentifier, versionIdentifier] = this.getIdentifiers(quads);
+  public bucketize = (quads: RDF.Quad[], versionIdentifier: string): void => {
+    const entityIdentifier = this.getEntityIdentifier(quads);
     const bucketTriple = this.createBucketTriple(entityIdentifier, versionIdentifier);
     quads.push(bucketTriple);
   };
@@ -29,22 +29,20 @@ export class SubjectPageBucketizer implements IBucketizer {
     );
   };
 
-  private readonly getIdentifiers = (quads: RDF.Quad[]): string[] => {
+  private readonly getEntityIdentifier = (quads: RDF.Quad[]): string => {
     let entityIdentifier = '';
-    let versionIdentifier = '';
 
     quads.forEach(quad => {
       if (quad.predicate.equals(this.versionOfProperty)) {
         entityIdentifier = quad.object.value;
-        versionIdentifier = quad.subject.value;
       }
     });
 
-    if (!entityIdentifier || !versionIdentifier) {
-      throw new Error(`[SubjectPageBucketizer]: One or more identifiers (entity or version) was not found.`);
+    if (!entityIdentifier) {
+      throw new Error(`[SubjectPageBucketizer]: Could not identify entity id because no triple with predicate ${this.versionOfProperty.value} was found.`);
     }
 
-    return [entityIdentifier, versionIdentifier];
+    return entityIdentifier;
   };
 
   private readonly getBucket = (entityIdentifier: string): string => {

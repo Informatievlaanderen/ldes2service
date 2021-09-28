@@ -55,28 +55,18 @@ export class Archive implements IWritableConnector {
   }
 
   public async writeVersion(quads: RDF.Quad[]): Promise<void> {
-    const versionFileName = this.getTimestampFilename(quads);
-    if (!versionFileName) {
-      throw new Error(`[Archive]: Could not create a filename based on object of timestamp property.`);
-    }
     const bucketTriples = this.getBucketTriples(quads);
 
     if (bucketTriples.length > 0) {
       bucketTriples.forEach(async triple => {
         const bucket = triple.object.value;
-        const bucketPath = `${this.outputDirectory}/${bucket}`;
+        const bucketPath = `${this.outputDirectory}/${bucket}.ttl`;
         quads = quads.filter(quad => !bucketTriples.includes(quad));
 
-        try {
-          await helpers.directoryExists(bucketPath);
-        } catch {
-          await helpers.createDirectory(bucketPath);
-        }
-
-        await this.writeToBucket(bucketPath, versionFileName, quads);
+        await this.writeToBucket(bucketPath, quads);
       });
     } else {
-      await this.writeToBucket(this.outputDirectory, versionFileName, quads);
+      const outputFile = 'result.ttl';
     }
   }
 
@@ -99,27 +89,14 @@ export class Archive implements IWritableConnector {
   private readonly getBucketTriples = (quads: RDF.Quad[]): RDF.Quad[] =>
     quads.filter(quad => quad.predicate.equals(this.bucketPredicate));
 
-  private readonly getTimestampFilename = (quads: RDF.Quad[]): string => {
-    let timestamp = '';
-    quads.forEach(quad => {
-      if (quad.predicate.equals(this.timestampProperty)) {
-        timestamp = quad.object.value;
-      }
-    });
-
-    return timestamp.replace(/[:-]/gu, '').replace(/[.]/gu, '_');
-  };
-
-  private readonly writeToBucket = async (bucketPath: string, filename: string, quads: RDF.Quad[]): Promise<void> => {
-    const versionPath = `${bucketPath}/${filename}.ttl`;
-
+  private readonly writeToBucket = async (bucketPath: string, quads: RDF.Quad[]): Promise<void> => {
     const writer = new N3.Writer();
     writer.addQuads(quads);
     writer.end(async (error, result) => {
       if (error) {
         throw new Error(error.stack);
       }
-      await helpers.writeToFile(versionPath, result);
+      await helpers.appendToBucket(bucketPath, result);
     });
   };
 }

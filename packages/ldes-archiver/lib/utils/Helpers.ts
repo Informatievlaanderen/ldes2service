@@ -1,6 +1,7 @@
-import { mkdir, access, writeFile } from 'fs/promises';
+import { mkdir, access, writeFile, appendFile } from 'fs/promises';
 import { AzureExtension } from '@ldes/archive-azure-extension';
 import { SubjectPageBucketizer } from '@ldes/subject-page-bucketizer';
+import { SubstringBucketizer } from '@ldes/substring-bucketizer';
 import type { IArchiveExtension, IBucketizer } from '@ldes/types';
 import { formatISO } from 'date-fns';
 import type { IExtensionOptions } from '../Archive';
@@ -9,6 +10,10 @@ export class Helpers {
   // User should be able to define a path outside this package
   public createDirectory(path: string): Promise<string | undefined> {
     return mkdir(path, { recursive: true });
+  }
+
+  public appendToBucket(path: string, data: any): Promise<void> {
+    return appendFile(path, data);
   }
 
   public directoryExists(path: string): Promise<void> {
@@ -41,10 +46,16 @@ export class Helpers {
     }
   };
 
-  public getBucketizer = (bucketizer: string, timestampPredicate: string): IBucketizer => {
+  public getBucketizer = (
+    bucketizer: string,
+    timestampPredicate?: string,
+    substringPredicate?: string,
+  ): IBucketizer => {
     switch (bucketizer) {
       case 'subject-pages':
-        return new SubjectPageBucketizer(timestampPredicate);
+        return new SubjectPageBucketizer(timestampPredicate!);
+      case 'substring':
+        return new SubstringBucketizer(substringPredicate!);
       default:
         throw new Error(`[Archiver]: Please provide a valid bucketizer strategy.`);
     }
