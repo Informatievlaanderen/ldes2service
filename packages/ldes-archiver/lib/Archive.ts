@@ -5,12 +5,9 @@ import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import { helpers } from './utils/Helpers';
 
-const BYTE_THRESHOLD = 50_000;
-
 export interface IArchiveOptions {
   outputDirectory: string;
   url: string;
-  timestampPredicate: string;
   extension?: IArchiveExtension;
 }
 
@@ -22,28 +19,21 @@ export interface IExtensionOptions {
 export class Archive implements IWritableConnector {
   public readonly outputDirectory: string;
   public readonly extension: IArchiveExtension;
-  public readonly timestampProperty: RDF.NamedNode;
-
   public readonly factory: RDF.DataFactory;
   public readonly bucketPredicate: RDF.NamedNode;
 
-  public constructor(
-    outputDirectory: string,
-    timestampPredicate: string,
-    extension?: IArchiveExtension | undefined,
-  ) {
+  public constructor(options: IArchiveOptions) {
     this.factory = new DataFactory();
-    this.outputDirectory = outputDirectory;
-    this.timestampProperty = this.factory.namedNode(timestampPredicate);
+    this.outputDirectory = options.outputDirectory;
     this.bucketPredicate = this.factory.namedNode('https://w3id.org/ldes#bucket');
 
-    if (extension) {
-      this.extension = extension!;
+    if (options.extension) {
+      this.extension = options.extension!;
     }
   }
 
   public stop = async (): Promise<void> => {
-    throw new Error(`Not implemented.`);
+    throw new Error(`[Archive]: Method not implemented.`);
   };
 
   public async provision(): Promise<void> {
@@ -57,17 +47,21 @@ export class Archive implements IWritableConnector {
   public async writeVersion(quads: RDF.Quad[]): Promise<void> {
     const bucketTriples = this.getBucketTriples(quads);
 
+    const tasks: any = [];
     if (bucketTriples.length > 0) {
       bucketTriples.forEach(async triple => {
         const bucket = triple.object.value;
         const bucketPath = `${this.outputDirectory}/${bucket}.ttl`;
         quads = quads.filter(quad => !bucketTriples.includes(quad));
 
-        await this.writeToBucket(bucketPath, quads);
+        tasks.push(this.writeToBucket(bucketPath, quads));
       });
     } else {
-      const outputFile = 'result.ttl';
+      const path = `${this.outputDirectory}/bucketless.ttl`;
+      tasks.push(this.writeToBucket(path, quads));
     }
+
+    await Promise.all(tasks);
   }
 
   public flush = async (): Promise<void> => {

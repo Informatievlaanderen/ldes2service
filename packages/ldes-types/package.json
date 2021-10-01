@@ -24,7 +24,12 @@
     "url": "https://github.com/Informatievlaanderen/ldes2service/issues"
   },
   "dependencies": {
+    "@rdfjs/dataset": "^1.1.1",
     "@rdfjs/types": "^1.0.1",
+    "clownface": "^1.4.0",
+    "clownface-shacl-path": "^1.2.2",
+    "n3": "^1.11.1",
+    "rdf-data-factory": "^1.1.0",
     "rdfjs": "0.0.1"
   }
 }

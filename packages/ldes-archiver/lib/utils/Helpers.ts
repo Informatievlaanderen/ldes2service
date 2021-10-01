@@ -48,14 +48,13 @@ export class Helpers {
 
   public getBucketizer = (
     bucketizer: string,
-    timestampPredicate?: string,
-    substringPredicate?: string,
+    propertyPath: string,
   ): IBucketizer => {
     switch (bucketizer) {
-      case 'subject-pages':
-        return new SubjectPageBucketizer(timestampPredicate!);
       case 'substring':
-        return new SubstringBucketizer(substringPredicate!);
+        return new SubstringBucketizer(propertyPath);
+      case 'subject-page':
+        return new SubjectPageBucketizer(propertyPath);
       default:
         throw new Error(`[Archiver]: Please provide a valid bucketizer strategy.`);
     }

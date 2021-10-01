@@ -7,19 +7,39 @@
   "engines": {
     "node": ">=14.0"
   },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "tsconfig.json"
+      }
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(clownface-shacl-path)"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec)).test.ts$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "collectCoverage": true
+  },
   "scripts": {
     "start": "node ./packages/ldes-replicator/bin/ldes-replicator.js",
     "build-changed": "lerna run build --since HEAD",
     "build": "npm run build:ts",
     "build:ts": "tsc",
     "start:docker": "node docker_setup.js && npm run start",
+    "test:unit": "jest __tests__/unit",
     "test:integration": "jest __tests__/integration",
     "test:integration:docker": "docker-compose -f docker-compose.test.yml up -d && sleep 2 && npm run test:integration && docker-compose -f docker-compose.test.yml down",
     "eslint": "eslint --ext ts",
     "eslint:cache": "npm run eslint -- --cache",
     "prettier": "prettier --check \"./**/*.{ts,json,md,yml}\"",
     "lint": "npm run eslint",
-    "lint:prettier" : "npm run eslint && npm run prettier",
+    "lint:prettier": "npm run eslint && npm run prettier",
     "lint:fix": "npm run eslint -- --fix && npm run prettier -- --write",
     "clean": "rm -rf ./node_modules && rm -rf ./packages/*/node_modules",
     "postinstall": "npm run bootstrap",
@@ -30,6 +50,7 @@
     "watch": "tsc && tsc -w"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "@types/node": "^16.0.0",
     "eslint": "^7.30.0",
     "eslint-config-es": "3.29.11",
@@ -40,10 +61,11 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-tsdoc": "^0.2.14",
     "eslint-plugin-unused-imports": "^1.1.2",
-    "jest": "^24.9.0",
+    "jest": "^27.2.4",
     "lerna": "^4.0.0",
     "pre-commit": "^1.2.2",
     "prettier": "^2.3.2",
+    "ts-jest": "^27.0.5",
     "typescript": "^4.3.5"
   },
   "pre-commit": [

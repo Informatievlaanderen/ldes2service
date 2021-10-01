@@ -2,9 +2,13 @@ import type { IArchiveExtension, IBucketizer } from '@ldes/types';
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import type { OptionValues } from 'commander';
 import { Command } from 'commander';
+import { DataFactory } from 'rdf-data-factory';
 import type { IArchiveOptions, IExtensionOptions } from '../lib/Archive';
 import { Archive } from '../lib/Archive';
 import { helpers } from '../lib/utils/Helpers';
+
+const N3 = require('n3');
+import type * as RDF from '@rdfjs/types';
 
 const program = new Command();
 
@@ -13,19 +17,8 @@ program
   .requiredOption('--outputDir <dir>', 'Directory to write the (temporary) output to')
   .option('-b, --bucketizer <strategy>', 'Strategy on how to bucketize the LDES')
   .option(
-    '-t, --timestampPredicate <predicate>',
-    // eslint-disable-next-line max-len
-    'Indicating how you can understand using a timestamp a member precedes another member in the LDES. Default: "http://www.w3.org/ns/prov#generatedAtTime"',
-    'http://www.w3.org/ns/prov#generatedAtTime',
-  )
-  .option(
-    '-v, --versionOfPredicate <predicate>',
-    'Indicating the non-version object. Default "http://purl.org/dc/terms/isVersionOf"',
-    'http://purl.org/dc/terms/isVersionOf',
-  )
-  .option(
-    '-s, --substringPredicate <predicate>',
-    'Indicating on which predicate the substring fragmentation should be applied.',
+    '-p, --propertyPath <path>',
+    'The property path the must be used in the bucktizer',
   )
   .option(
     '--extension <extension>',
@@ -46,11 +39,9 @@ const run = async (_options: OptionValues): Promise<void> => {
 
   const archiveOptions: IArchiveOptions = {
     url: _options.url,
-    timestampPredicate: _options.timestampPredicate,
     outputDirectory: _options.outputDir,
   };
 
-  let extension: IArchiveExtension;
   if (_options.extension) {
     if (!_options.connectionString || !_options.container) {
       throw new Error(`[Archiver]: Please provide a connection string and a container name to connect to.`);
@@ -59,20 +50,18 @@ const run = async (_options: OptionValues): Promise<void> => {
         connectionString: _options.connectionString,
         containerName: _options.containerName,
       };
-      extension = helpers.getExtension(_options.extension, archiveOptions.outputDirectory, extensionOptions);
+      archiveOptions.extension =
+        helpers.getExtension(_options.extension, archiveOptions.outputDirectory, extensionOptions);
     }
   }
 
   let bucketizer: IBucketizer;
   if (_options.bucketizer) {
-    bucketizer = helpers.getBucketizer(_options.bucketizer, _options.versionOfPredicate, _options.substringPredicate);
+    bucketizer = helpers.getBucketizer(_options.bucketizer, _options.propertyPath);
   }
 
   const LDESClient = newEngine();
-  const archive = new Archive(
-    archiveOptions.outputDirectory,
-    archiveOptions.timestampPredicate,
-  );
+  const archive = new Archive(archiveOptions);
   await archive.provision();
 
   const ldes = LDESClient.createReadStream(archiveOptions.url, ldesOptions);
