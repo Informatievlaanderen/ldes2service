@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "strict": true,
     "strictFunctionTypes": false,
+    "declaration": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

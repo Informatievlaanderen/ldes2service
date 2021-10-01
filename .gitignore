@@ -1,12 +1,17 @@
 **/node_modules
 **/lib/**/*.js
+**/lib/**/*.d.ts
 **/test/**/*.js
+**/test/**/*.d.ts
 **/bin/**/*.js
+**/bin*/**/*.d.ts
 **/index.js
+**/index.d.ts
 **/template.js
 .vscode
 lerna-debug.log
 .eslintcache
 .env
 coverage
+**/*.d.ts
 

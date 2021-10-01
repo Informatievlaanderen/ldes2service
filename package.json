@@ -13,9 +13,6 @@
         "tsconfig": "tsconfig.json"
       }
     },
-    "transformIgnorePatterns": [
-      "node_modules/(clownface-shacl-path)"
-    ],
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },

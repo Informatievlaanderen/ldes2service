@@ -3,7 +3,7 @@
     "publish": {
       "ignoreChanges": ["*.md"],
       "message": "Bump to release version %s",
-      "allowBranch": "master",
+      "allowBranch": "main",
       "npmClient": "npm"
     }
   },
