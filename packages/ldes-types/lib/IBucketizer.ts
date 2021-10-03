@@ -6,13 +6,32 @@ const clownface = require('clownface');
 const N3 = require('n3');
 
 export abstract class IBucketizer {
-  public readonly propertyPathQuads: RDF.Quad[];
+  public readonly propertyPath: string;
+  public propertyPathQuads: RDF.Quad[];
   public readonly factory: RDF.DataFactory;
 
   public constructor(propertyPath: string) {
     this.factory = new DataFactory();
-    this.propertyPathQuads = this.parsePropertyPath(propertyPath);
+    this.propertyPath = propertyPath;
   }
+
+  public init = (): Promise<void> => new Promise((resolve, reject) => {
+    const fullPath = `_:b0 <https://w3id.org/tree#path> ${this.propertyPath} .`;
+    this.propertyPathQuads = [];
+
+    const parser = new N3.Parser();
+    parser.parse(fullPath, (error: any, quad: any, prefixes: any) => {
+      if (error) {
+        reject(error.stack);
+      }
+
+      if (quad) {
+        this.propertyPathQuads.push(quad);
+      } else {
+        resolve();
+      }
+    });
+  });
 
   /**
    * Adds extra triples to the array of quads indicating
@@ -29,6 +48,8 @@ export abstract class IBucketizer {
    * @returns an RDF Term
    */
   public extractPropertyPathObject = (memberQuads: RDF.Quad[], memberId: string): RDF.Term => {
+    console.log('START EXTRACTING');
+    console.log(this.propertyPathQuads);
     const entryBlankNode = this.getEntryBlanknode().object;
     const data = clownface({ dataset: dataset(memberQuads) }).namedNode(memberId);
     const path = clownface({ dataset: dataset(this.propertyPathQuads) }).blankNode(entryBlankNode);
@@ -53,6 +74,9 @@ export abstract class IBucketizer {
 
       if (quad) {
         propertyPathQuads.push(quad);
+      } else {
+        console.log('DONE PARSING');
+        console.log(propertyPathQuads);
       }
     });
 

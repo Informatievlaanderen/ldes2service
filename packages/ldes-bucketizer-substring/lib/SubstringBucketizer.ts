@@ -9,6 +9,12 @@ export class SubstringBucketizer extends IBucketizer {
     this.propertyPath = propertyPath;
   }
 
+  public static build = async (propertyPath: string): Promise<SubstringBucketizer> => {
+    const bucketizer = new SubstringBucketizer(propertyPath);
+    await bucketizer.init();
+    return bucketizer;
+  };
+
   public bucketize = (quads: RDF.Quad[], memberId: string): void => {
     const propertyPathObject: RDF.Term = this.extractPropertyPathObject(quads, memberId);
 

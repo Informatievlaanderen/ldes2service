@@ -9,8 +9,15 @@ export class SubjectPageBucketizer extends IBucketizer {
     this.propertyPath = propertyPath;
   }
 
+  public static build = async (propertyPath: string): Promise<SubjectPageBucketizer> => {
+    const bucketizer = new SubjectPageBucketizer(propertyPath);
+    await bucketizer.init();
+    return bucketizer;
+  };
+
   public bucketize = (quads: RDF.Quad[], memberId: string): void => {
     const propertyPathObject = this.extractPropertyPathObject(quads, memberId);
+    console.log(propertyPathObject);
 
     if (!propertyPathObject) {
       throw new Error(`[SubjectPageBucketizer]: No matches found for property path "${this.propertyPath}"`);

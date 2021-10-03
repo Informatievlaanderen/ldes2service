@@ -1,14 +1,12 @@
-import type { IArchiveExtension, IBucketizer } from '@ldes/types';
+import type { IBucketizer } from '@ldes/types';
 import { newEngine } from '@treecg/actor-init-ldes-client';
 import type { OptionValues } from 'commander';
 import { Command } from 'commander';
-import { DataFactory } from 'rdf-data-factory';
 import type { IArchiveOptions, IExtensionOptions } from '../lib/Archive';
 import { Archive } from '../lib/Archive';
 import { helpers } from '../lib/utils/Helpers';
 
 const N3 = require('n3');
-import type * as RDF from '@rdfjs/types';
 
 const program = new Command();
 
@@ -57,7 +55,7 @@ const run = async (_options: OptionValues): Promise<void> => {
 
   let bucketizer: IBucketizer;
   if (_options.bucketizer) {
-    bucketizer = helpers.getBucketizer(_options.bucketizer, _options.propertyPath);
+    bucketizer = await helpers.getBucketizer(_options.bucketizer, _options.propertyPath);
   }
 
   const LDESClient = newEngine();

@@ -49,12 +49,12 @@ export class Helpers {
   public getBucketizer = (
     bucketizer: string,
     propertyPath: string,
-  ): IBucketizer => {
+  ): Promise<IBucketizer> => {
     switch (bucketizer) {
       case 'substring':
-        return new SubstringBucketizer(propertyPath);
+        return new Promise(resolve => resolve(SubstringBucketizer.build(propertyPath)));
       case 'subject-page':
-        return new SubjectPageBucketizer(propertyPath);
+        return new Promise(resolve => resolve(SubjectPageBucketizer.build(propertyPath)));
       default:
         throw new Error(`[Archiver]: Please provide a valid bucketizer strategy.`);
     }

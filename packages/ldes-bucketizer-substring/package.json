@@ -1,18 +1,23 @@
 {
   "name": "@ldes/substring-bucketizer",
-  "version": "0.0.1",
-  "description": "> TODO: description",
+  "version": "0.0.0",
+  "description": "Applies a substring fragmentation to LDES members",
   "author": "Dwight Van Lancker <dwight.vanlancker@hotmail.com>",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.js",
+  "typings": "index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
   },
-  "files": [
-    "lib"
-  ],
+	"files": [
+		"index.ts",
+		"index.js",
+		"index.d.ts",
+		"lib/**/*.js",
+		"lib/**/*.d.ts"
+	],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Informatievlaanderen/ldes2service.git"
