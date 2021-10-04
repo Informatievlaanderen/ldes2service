@@ -1,5 +1,5 @@
 import type { Url } from 'url';
-import type { IState } from '@ldes/types';
+import type { IState } from '@treecg/ldes-types';
 import type { WrappedNodeRedisClient } from 'handy-redis';
 import { createNodeRedisClient } from 'handy-redis';
 

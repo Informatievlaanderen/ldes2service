@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { IConnectorService } from '../../ldes-types';
+import { IConnectorService } from '@treecg/ldes-types';
 
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';

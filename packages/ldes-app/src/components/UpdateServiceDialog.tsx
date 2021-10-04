@@ -1,4 +1,4 @@
-import { IConfigTemplate, IConfigTemplates, IConnectorService } from '@ldes/types';
+import { IConfigTemplate, IConfigTemplates, IConnectorService } from '@treecg/ldes-types';
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Dialog, DialogOverlay, DialogContent } from '@reach/dialog';

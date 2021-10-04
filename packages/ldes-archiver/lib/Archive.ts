@@ -1,5 +1,5 @@
 import { readdir } from 'fs/promises';
-import type { IWritableConnector, IArchiveExtension } from '@ldes/types';
+import type { IWritableConnector, IArchiveExtension } from '@treecg/ldes-types';
 import type * as RDF from '@rdfjs/types';
 import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';

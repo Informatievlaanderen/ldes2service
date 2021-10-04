@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDeleteService } from '../hooks/api/useService';
-import { IConnectorService } from '@ldes/types';
+import { IConnectorService } from '@treecg/ldes-types';
 import { useHistory } from 'react-router-dom';
 import { Submit } from './Input';
 

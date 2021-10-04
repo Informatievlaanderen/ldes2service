@@ -3,11 +3,11 @@
  */
 
 import * as fs from 'fs/promises';
-import type { IRedisStateConfig } from '@ldes/ldes-redis-state';
-import { RedisState } from '@ldes/ldes-redis-state';
-import type { ConnectorConfigs, LdesObjects, LdesShape } from '@ldes/types';
 import { Command, flags } from '@oclif/command';
 import { newEngine } from '@treecg/actor-init-ldes-client';
+import type { IRedisStateConfig } from '@treecg/ldes-redis-state';
+import { RedisState } from '@treecg/ldes-redis-state';
+import type { ConnectorConfigs, LdesObjects, LdesShape } from '@treecg/ldes-types';
 import type { Quad } from 'n3';
 import { DataFactory, Store } from 'n3';
 import rdfDereferencer from 'rdf-dereference';
@@ -53,7 +53,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
   let store: Store = new Store();
 
   if (!shapeURI) {
-    const storeQuads: Store = <Store>await storeStream(ldesQuads);
+    const storeQuads: Store = <Store> await storeStream(ldesQuads);
     storeQuads
       .getQuads(namedNode(ldesURI), namedNode('https://w3id.org/tree#shape'), null, null)
       .forEach((quad: Quad) => {
@@ -66,7 +66,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
   }
   if (store.size === 0 && shapeURI) {
     const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
-    store = <Store>await storeStream(shapeQuads);
+    store = <Store> await storeStream(shapeQuads);
   }
 
   const paths = Object.fromEntries(
@@ -76,22 +76,22 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
         const shaclProperty = quad.object;
         return store.getQuads(shaclProperty, namedNode('https://www.w3.org/ns/shacl#path'), null, null)[0];
       })
-      .map((quad: Quad) => [quad.subject.value, quad])
+      .map((quad: Quad) => [quad.subject.value, quad]),
   );
   const datatypes = Object.fromEntries(
     store
       .getQuads(null, namedNode('https://www.w3.org/ns/shacl#datatype'), null, null)
-      .map((quad: Quad) => [quad.subject.value, quad])
+      .map((quad: Quad) => [quad.subject.value, quad]),
   );
   const nodeKinds = Object.fromEntries(
     store
       .getQuads(null, namedNode('https://www.w3.org/ns/shacl#nodeKind'), null, null)
-      .map((quad: Quad) => [quad.subject.value, quad])
+      .map((quad: Quad) => [quad.subject.value, quad]),
   );
   const classes = Object.fromEntries(
     store
       .getQuads(null, namedNode('https://www.w3.org/ns/shacl#class'), null, null)
-      .map((quad: Quad) => [quad.subject.value, quad])
+      .map((quad: Quad) => [quad.subject.value, quad]),
   );
 
   const result = Object.entries(paths).map(([id, quad]) => ({
@@ -125,7 +125,7 @@ class LdesReplicator extends Command {
     try {
       await fs.access(args.CONFIG, 4);
     } catch {
-      throw new Error("The config file doesn't exist or isn't a file.");
+      throw new Error('The config file doesn\'t exist or isn\'t a file.');
     }
     const config: IReplicatorConfig = JSON.parse(await fs.readFile(args.CONFIG, { encoding: 'utf8' }));
 
@@ -149,8 +149,8 @@ class LdesReplicator extends Command {
             name: slugify(ldes.url, { remove: /[!"'()*+./:@~]/gu }),
             shape: await fetchShape({ shapeURI: ldes.shapeUrl, ldesURI: ldes.url }),
           },
-        ])
-      )
+        ]),
+      ),
     );
 
     const orchestrator = new Orchestrator(state, streams, config.connectors);

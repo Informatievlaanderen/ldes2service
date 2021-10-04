@@ -1,5 +1,5 @@
 {
-	"name": "@treecg/subject-page-bucketizer",
+	"name": "@treecg/ldes-subject-page-bucketizer",
 	"version": "0.0.0",
 	"description": "Applies a subject page fragmentation to LDES members",
 	"author": "Dwight Van Lancker <dwight.vanlancker@hotmail.com>",
@@ -26,8 +26,8 @@
 		"url": "https://github.com/Informatievlaanderen/ldes2service/issues"
 	},
 	"dependencies": {
-		"@ldes/types": "^0.0.0",
 		"@rdfjs/types": "^1.0.1",
+		"@treecg/ldes-types": "^0.0.0",
 		"rdf-data-factory": "^1.1.0"
 	}
 }

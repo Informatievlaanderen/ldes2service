@@ -1,6 +1,6 @@
-import { router, generatorSetup } from '@ldes/generator-rest-api';
-import { template as mongoTemplate } from '@ldes/ldes-mongodb-connector';
-import { template as postgresTemplate } from '@ldes/ldes-postgres-connector';
+import { router, generatorSetup } from '@treecg/ldes-generator-rest-api';
+import { template as mongoTemplate } from '@treecg/ldes-mongodb-connector';
+import { template as postgresTemplate } from '@treecg/ldes-postgres-connector';
 
 generatorSetup([
   {

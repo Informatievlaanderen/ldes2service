@@ -1,4 +1,4 @@
-import type { IGeneratorApiSetup } from '@ldes/types';
+import type { IGeneratorApiSetup } from '@treecg/ldes-types';
 import { parse, stringify } from 'yaml';
 
 const composer = require('docker-composer');

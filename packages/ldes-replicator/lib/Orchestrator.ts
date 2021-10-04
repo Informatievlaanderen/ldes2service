@@ -5,7 +5,7 @@ import type {
   LdesObject,
   LdesObjects,
   ConnectorConfigs,
-} from '@ldes/types';
+} from '@treecg/ldes-types';
 
 /**
  * An Orchestrator will handle the synchronization of the Linked Data Event Stream.

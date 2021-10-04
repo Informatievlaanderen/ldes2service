@@ -1,5 +1,5 @@
-import { IBucketizer } from '@ldes/types';
 import type * as RDF from '@rdfjs/types';
+import { IBucketizer } from '@treecg/ldes-types';
 
 export class SubstringBucketizer extends IBucketizer {
   public propertyPath: string;

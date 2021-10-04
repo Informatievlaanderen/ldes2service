@@ -1,4 +1,4 @@
-import type { IConfigTemplate } from '@ldes/types';
+import type { IConfigTemplate } from '@treecg/ldes-types';
 
 export const template: IConfigTemplate = {
   name: '@ldes/ldes-mongodb-connector',

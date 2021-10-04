@@ -1,4 +1,4 @@
-import type { IGeneratorPluginOptions } from '@ldes/types';
+import type { IGeneratorPluginOptions } from '@treecg/ldes-types';
 import fastify from 'fastify';
 import { router } from '../lib/GeneratorPlugin';
 

@@ -2,7 +2,7 @@ import { readdir, unlink } from 'fs/promises';
 import path = require('path');
 import type { ContainerClient } from '@azure/storage-blob';
 import { BlobServiceClient } from '@azure/storage-blob';
-import type { IArchiveExtension } from '@ldes/types';
+import type { IArchiveExtension } from '@treecg/ldes-types';
 
 export class AzureExtension implements IArchiveExtension {
   private readonly connectionString: string;

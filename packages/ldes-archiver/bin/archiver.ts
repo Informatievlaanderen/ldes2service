@@ -1,5 +1,5 @@
-import type { IBucketizer } from '@ldes/types';
 import { newEngine } from '@treecg/actor-init-ldes-client';
+import type { IBucketizer } from '@treecg/ldes-types';
 import type { OptionValues } from 'commander';
 import { Command } from 'commander';
 import type { IArchiveOptions, IExtensionOptions } from '../lib/Archive';

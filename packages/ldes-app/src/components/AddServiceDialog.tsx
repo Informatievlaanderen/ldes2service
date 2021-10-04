@@ -1,4 +1,4 @@
-import { IConnectorService } from '@ldes/types';
+import { IConnectorService } from '@treecg/ldes-types';
 import React, { useState } from 'react';
 import { Dialog } from '@reach/dialog';
 import '@reach/dialog/styles.css';

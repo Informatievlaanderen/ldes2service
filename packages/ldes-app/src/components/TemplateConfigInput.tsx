@@ -1,4 +1,4 @@
-import { IConfigTemplate } from '@ldes/types';
+import { IConfigTemplate } from '@treecg/ldes-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Input, InputGroup, Label } from './Input';

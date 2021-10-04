@@ -23,7 +23,7 @@ const connectorBodyJsonSchema = {
     name: { type: 'string' },
     type: {
       type: 'string',
-      enum: ['@ldes/ldes-postgres-connector', '@ldes/ldes-mongodb-connector'],
+      enum: ['@treecg/ldes-postgres-connector', '@treecg/ldes-mongodb-connector'],
     },
     image: { type: 'string' },
     port: { type: 'number' },

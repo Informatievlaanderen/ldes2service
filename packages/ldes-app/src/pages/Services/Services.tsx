@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { IConnectorService } from '../../../../ldes-types';
+import { IConnectorService } from '@treecg/ldes-types';
 import { AddServiceDialog } from '../../components/AddServiceDialog';
 import { H1, H2 } from '../../components/Headings';
 import { Td, Th, Tr } from '../../components/Table';

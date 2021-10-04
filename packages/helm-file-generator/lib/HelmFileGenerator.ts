@@ -1,4 +1,4 @@
-import type { IGeneratorApiSetup } from '@ldes/types';
+import type { IGeneratorApiSetup } from '@treecg/ldes-types';
 import { stringify, parse } from 'yaml';
 
 const format = require('string-format');

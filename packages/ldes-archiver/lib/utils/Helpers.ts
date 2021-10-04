@@ -1,8 +1,8 @@
 import { mkdir, access, writeFile, appendFile } from 'fs/promises';
-import { AzureExtension } from '@ldes/archive-azure-extension';
-import { SubjectPageBucketizer } from '@ldes/subject-page-bucketizer';
-import { SubstringBucketizer } from '@ldes/substring-bucketizer';
-import type { IArchiveExtension, IBucketizer } from '@ldes/types';
+import { AzureExtension } from '@treecg/ldes-local-archive-azure-extension';
+import { SubjectPageBucketizer } from '@treecg/ldes-subject-page-bucketizer';
+import { SubstringBucketizer } from '@treecg/ldes-substring-bucketizer';
+import type { IArchiveExtension, IBucketizer } from '@treecg/ldes-types';
 import { formatISO } from 'date-fns';
 import type { IExtensionOptions } from '../Archive';
 

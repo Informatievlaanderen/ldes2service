@@ -1,8 +1,8 @@
+import { DockerComposeGenerator } from '@treecg/ldes-docker-compose-generator';
+import { HelmFileGenerator } from '@treecg/ldes-helm-file-generator';
+import type { IGeneratorApiSetup, IGeneratorPluginOptions } from '@treecg/ldes-types';
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
-import { DockerComposeGenerator } from '../../docker-compose-generator';
-import { HelmFileGenerator } from '../../helm-file-generator';
-import type { IGeneratorApiSetup, IGeneratorPluginOptions } from '../../ldes-types';
 
 const dockerComposeGenerator = new DockerComposeGenerator();
 const helmFileGenerator = new HelmFileGenerator();
@@ -14,7 +14,7 @@ export function generatorSetup(body: IGeneratorApiSetup[]): void {
 
 const GeneratorRoute: FastifyPluginAsync = async (
   server: FastifyInstance,
-  options: IGeneratorPluginOptions
+  options: IGeneratorPluginOptions,
 ) => {
   const prefix = options.prefix?.replace(/\/$/gu, '') || '';
 
@@ -39,7 +39,7 @@ const GeneratorRoute: FastifyPluginAsync = async (
       async (_request: any, _reply: any) => {
         generatorSetup(_request.body);
         _reply.send('Generators updated.');
-      }
+      },
     );
   }
 
@@ -73,7 +73,7 @@ const GeneratorRoute: FastifyPluginAsync = async (
         default:
           _reply.send('No file type was selected!');
       }
-    }
+    },
   );
 };
 

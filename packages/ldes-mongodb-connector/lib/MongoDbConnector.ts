@@ -1,4 +1,4 @@
-import type { IWritableConnector, IConfigConnector, LdesShape } from '@ldes/types';
+import type { IWritableConnector, IConfigConnector, LdesShape } from '@treecg/ldes-types';
 import type { Db } from 'mongodb';
 import { MongoClient } from 'mongodb';
 import slugify from 'slugify';

@@ -1,5 +1,5 @@
 import type { Url } from 'url';
-import type { IState } from '@ldes/types';
+import type { IState } from '@treecg/ldes-types';
 
 export class DummyState implements IState {
   private readonly pages: Url[];

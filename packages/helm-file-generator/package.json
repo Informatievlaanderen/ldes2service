@@ -1,5 +1,6 @@
 {
-  "name": "@ldes/helm-file-generator",
+  "private": "true",
+  "name": "@treecg/ldes-helm-file-generator",
   "version": "0.0.0",
   "description": "> Generates a helmfile to run an LDES replicator and its connected backends with user provided settings.",
   "homepage": "https://github.com/osoc21/ldes2service#readme",
@@ -24,11 +25,11 @@
     "url": "https://github.com/osoc21/ldes2service/issues"
   },
   "dependencies": {
+    "@treecg/ldes-types": "^0.0.0",
     "string-format": "^2.0.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {
-    "@ldes/types": "^0.0.0",
     "typescript": "^4.4.3"
   }
 }

@@ -1,4 +1,4 @@
-import { IBucketizer } from '@ldes/types';
+import { IBucketizer } from '@treecg/ldes-types';
 import type * as RDF from '@rdfjs/types';
 
 export class SubjectPageBucketizer extends IBucketizer {

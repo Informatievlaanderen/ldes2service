@@ -1,4 +1,4 @@
-import type { IConfigConnector, IWritableConnector, LdesShape } from '@ldes/types';
+import type { IConfigConnector, IWritableConnector, LdesShape } from '@treecg/ldes-types';
 
 export class DummyConnector implements IWritableConnector {
   private readonly members: any[];

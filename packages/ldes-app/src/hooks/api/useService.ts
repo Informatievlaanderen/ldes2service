@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from 'react-query';
-import { IConnectorService } from '@ldes/types';
+import { IConnectorService } from '@treecg/ldes-types';
 import { useContext } from 'react';
 import { AppContext } from '../../App';
 

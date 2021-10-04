@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IConfigTemplate, IConnectorService } from '@ldes/types';
+import { IConfigTemplate, IConnectorService } from '@treecg/ldes-types';
 import { H1, H2, H3 } from '../../components/Headings';
 import { Input, InputGroup, Label, Submit } from '../../components/Input';
 import { Td, Th, Tr } from '../../components/Table';
