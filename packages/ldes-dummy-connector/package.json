@@ -1,7 +1,7 @@
 {
 	"private": "true",
 	"name": "@treecg/ldes-dummy-connector",
-	"version": "0.0.0",
+	"version": "0.0.1-alpha.0",
 	"description": "> TODO: description",
 	"homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
 	"license": "ISC",
@@ -24,6 +24,6 @@
 		"url": "https://github.com/Informatievlaanderen/ldes2service/issues"
 	},
 	"dependencies": {
-		"@treecg/ldes-types": "^0.0.0"
+		"@treecg/ldes-types": "^0.0.1-alpha.0"
 	}
 }
