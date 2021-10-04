@@ -1,16 +1,21 @@
 {
-  "name": "@ldes/types",
+  "name": "@treecg/ldes-types",
   "version": "0.0.0",
-  "description": "> TODO: description",
+  "description": "Typings for LDES2Service",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
   "license": "ISC",
   "main": "index.js",
+  "typings": "index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
   },
   "files": [
-    "lib"
+		"index.ts",
+		"index.js",
+		"index.d.ts",
+		"lib/**/*.js",
+		"lib/**/*.d.ts"
   ],
   "repository": {
     "type": "git",
