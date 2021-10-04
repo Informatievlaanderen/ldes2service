@@ -48,8 +48,6 @@ export abstract class IBucketizer {
    * @returns an RDF Term
    */
   public extractPropertyPathObject = (memberQuads: RDF.Quad[], memberId: string): RDF.Term => {
-    console.log('START EXTRACTING');
-    console.log(this.propertyPathQuads);
     const entryBlankNode = this.getEntryBlanknode().object;
     const data = clownface({ dataset: dataset(memberQuads) }).namedNode(memberId);
     const path = clownface({ dataset: dataset(this.propertyPathQuads) }).blankNode(entryBlankNode);
@@ -61,27 +59,6 @@ export abstract class IBucketizer {
     this.factory.namedNode('https://w3id.org/ldes#bucket'),
     this.factory.literal(bucket, this.factory.namedNode('http://www.w3.org/2001/XMLSchema#string')),
   );
-
-  private readonly parsePropertyPath = (propertyPath: string): RDF.Quad[] => {
-    const fullPath = `_:b0 <https://w3id.org/tree#path> ${propertyPath} .`;
-    const propertyPathQuads: RDF.Quad[] = [];
-
-    const parser = new N3.Parser();
-    parser.parse(fullPath, (error: any, quad: any, prefixes: any) => {
-      if (error) {
-        throw new Error(error.stack);
-      }
-
-      if (quad) {
-        propertyPathQuads.push(quad);
-      } else {
-        console.log('DONE PARSING');
-        console.log(propertyPathQuads);
-      }
-    });
-
-    return propertyPathQuads;
-  };
 
   private readonly getEntryBlanknode = (): RDF.Quad =>
     this.propertyPathQuads.find(quad => quad.predicate.value === 'https://w3id.org/tree#path')!;

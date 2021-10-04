@@ -1,5 +1,5 @@
-import { IBucketizer } from '@treecg/ldes-types';
 import type * as RDF from '@rdfjs/types';
+import { IBucketizer } from '@treecg/ldes-types';
 
 export class SubjectPageBucketizer extends IBucketizer {
   public propertyPath: string;
@@ -17,7 +17,6 @@ export class SubjectPageBucketizer extends IBucketizer {
 
   public bucketize = (quads: RDF.Quad[], memberId: string): void => {
     const propertyPathObject = this.extractPropertyPathObject(quads, memberId);
-    console.log(propertyPathObject);
 
     if (!propertyPathObject) {
       throw new Error(`[SubjectPageBucketizer]: No matches found for property path "${this.propertyPath}"`);
