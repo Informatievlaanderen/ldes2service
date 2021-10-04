@@ -39,7 +39,7 @@ export abstract class IBucketizer {
    */
   public abstract bucketize: (quads: RDF.Quad[], memberId: string) => void;
 
-  public abstract createBuckets: (propertyPathObject: RDF.Term) => string[];
+  public abstract createBuckets: (propertyPathObject: RDF.Term[]) => string[];
 
   /**
    * Returns the RDF Term that matches the property path and will be used to create a bucket triple
@@ -47,11 +47,11 @@ export abstract class IBucketizer {
    * @param memberId identifier of the member
    * @returns an RDF Term
    */
-  public extractPropertyPathObject = (memberQuads: RDF.Quad[], memberId: string): RDF.Term => {
+  public extractPropertyPathObject = (memberQuads: RDF.Quad[], memberId: string): RDF.Term[] => {
     const entryBlankNode = this.getEntryBlanknode().object;
     const data = clownface({ dataset: dataset(memberQuads) }).namedNode(memberId);
     const path = clownface({ dataset: dataset(this.propertyPathQuads) }).blankNode(entryBlankNode);
-    return findNodes(data, path).term;
+    return findNodes(data, path).terms;
   };
 
   public createBucketTriple = (bucket: string, memberId: string): RDF.Quad => this.factory.quad(

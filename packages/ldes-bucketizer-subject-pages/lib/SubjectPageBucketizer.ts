@@ -16,20 +16,25 @@ export class SubjectPageBucketizer extends IBucketizer {
   };
 
   public bucketize = (quads: RDF.Quad[], memberId: string): void => {
-    const propertyPathObject = this.extractPropertyPathObject(quads, memberId);
+    const propertyPathObjects: RDF.Term[] = this.extractPropertyPathObject(quads, memberId);
 
-    if (!propertyPathObject) {
+    if (propertyPathObjects.length <= 0) {
       throw new Error(`[SubjectPageBucketizer]: No matches found for property path "${this.propertyPath}"`);
     }
 
-    const buckets = this.createBuckets(propertyPathObject);
+    const buckets = this.createBuckets(propertyPathObjects);
     const bucketTriples = buckets.map(bucket => this.createBucketTriple(bucket, memberId));
 
     quads.push(...bucketTriples);
   };
 
-  public createBuckets = (propertyPathObject: RDF.Term): string[] => {
-    const parts = propertyPathObject.value.split('/');
-    return [parts[parts.length - 1]];
+  public createBuckets = (propertyPathObjects: RDF.Term[]): string[] => {
+    const buckets: string[] = [];
+    propertyPathObjects.forEach(propertyPathObject => {
+      const parts = propertyPathObject.value.split('/');
+      buckets.push(parts[parts.length - 1]);
+    });
+
+    return buckets;
   };
 }

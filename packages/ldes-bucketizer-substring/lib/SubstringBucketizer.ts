@@ -16,27 +16,29 @@ export class SubstringBucketizer extends IBucketizer {
   };
 
   public bucketize = (quads: RDF.Quad[], memberId: string): void => {
-    const propertyPathObject: RDF.Term = this.extractPropertyPathObject(quads, memberId);
+    const propertyPathObjects: RDF.Term[] = this.extractPropertyPathObject(quads, memberId);
 
-    if (!propertyPathObject) {
+    if (propertyPathObjects.length <= 0) {
       throw new Error(`[SubstringBucketizer]: No matches found for property path "${this.propertyPath}"`);
     }
 
-    const buckets = this.createBuckets(propertyPathObject);
+    const buckets = this.createBuckets(propertyPathObjects);
     const bucketTriples = buckets.map(bucket => this.createBucketTriple(bucket, memberId));
     quads.push(...bucketTriples);
   };
 
-  public createBuckets = (propertyPathObject: RDF.Term): string[] => {
-    const normalizedLiteral = this.normalize(propertyPathObject.value);
-    const parts = normalizedLiteral.split(' ');
+  public createBuckets = (propertyPathObjects: RDF.Term[]): string[] => {
     const buckets: string[] = [];
+    propertyPathObjects.forEach(propertyPathObject => {
+      const normalizedLiteral = this.normalize(propertyPathObject.value);
+      const parts = normalizedLiteral.split(' ');
 
-    parts.forEach(part => {
-      let substring = '';
-      [...part].forEach(character => {
-        substring += character;
-        buckets.push(substring);
+      parts.forEach(part => {
+        let substring = '';
+        [...part].forEach(character => {
+          substring += character;
+          buckets.push(substring);
+        });
       });
     });
 
