@@ -36,5 +36,6 @@
     "n3": "^1.11.1",
     "rdf-data-factory": "^1.1.0",
     "rdfjs": "0.0.1"
-  }
+  },
+  "gitHead": "88cfa35119380fdbe740d3eab618c93f12836f3b"
 }

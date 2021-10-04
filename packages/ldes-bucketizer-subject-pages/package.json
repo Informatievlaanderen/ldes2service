@@ -29,5 +29,6 @@
 		"@rdfjs/types": "^1.0.1",
 		"@treecg/ldes-types": "^0.0.1-alpha.0",
 		"rdf-data-factory": "^1.1.0"
-	}
+	},
+	"gitHead": "88cfa35119380fdbe740d3eab618c93f12836f3b"
 }
