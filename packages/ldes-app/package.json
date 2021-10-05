@@ -1,14 +1,14 @@
 {
   "private": "true",
   "name": "@treecg/ldes-app",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.4-alpha.0",
   "dependencies": {
     "@reach/dialog": "^0.15.3",
     "@reach/visually-hidden": "^0.15.2",
     "@tailwindcss/forms": "^0.3.3",
-    "@treecg/ldes-mongodb-connector": "^0.0.3-alpha.0",
-    "@treecg/ldes-postgres-connector": "^0.0.3-alpha.0",
-    "@treecg/ldes-types": "^0.0.3-alpha.0",
+    "@treecg/ldes-mongodb-connector": "^0.0.4-alpha.0",
+    "@treecg/ldes-postgres-connector": "^0.0.4-alpha.0",
+    "@treecg/ldes-types": "^0.0.4-alpha.0",
     "@types/node": "^14.17.5",
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",

@@ -1,7 +1,7 @@
 {
   "private": "true",
   "name": "@treecg/ldes-docker-compose-generator",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.4-alpha.0",
   "description": "> Generates a docker-compose file to run an LDES replicator and its connected backends with user provided settings.",
   "keywords": [
     "docker"
@@ -28,7 +28,7 @@
     "url": "https://github.com/osoc21/ldes2service/issues"
   },
   "dependencies": {
-    "@treecg/ldes-types": "^0.0.3-alpha.0",
+    "@treecg/ldes-types": "^0.0.4-alpha.0",
     "docker-composer": "^4.0.1",
     "string-format": "^2.0.0",
     "yaml": "^1.10.2"

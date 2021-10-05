@@ -1,6 +1,6 @@
 {
   "name": "@treecg/ldes-types",
-  "version": "0.0.3-alpha.0",
+  "version": "0.0.4-alpha.0",
   "description": "Typings for LDES2Service",
   "homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
   "license": "ISC",

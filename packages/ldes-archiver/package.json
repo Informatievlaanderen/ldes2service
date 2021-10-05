@@ -1,7 +1,7 @@
 {
 	"private": "true",
 	"name": "@treecg/ldes-local-archive-connector",
-	"version": "0.0.3-alpha.0",
+	"version": "0.0.4-alpha.0",
 	"description": "> TODO: description",
 	"author": "Dwight Van Lancker <dwight.vanlancker@hotmail.com>",
 	"homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
@@ -24,10 +24,10 @@
 	},
 	"dependencies": {
 		"@treecg/actor-init-ldes-client": "^2.3.11",
-		"@treecg/ldes-local-archive-azure-extension": "^0.0.3-alpha.0",
-		"@treecg/ldes-subject-page-bucketizer": "^0.0.3-alpha.0",
-		"@treecg/ldes-substring-bucketizer": "^0.0.3-alpha.0",
-		"@treecg/ldes-types": "^0.0.3-alpha.0",
+		"@treecg/ldes-local-archive-azure-extension": "^0.0.4-alpha.0",
+		"@treecg/ldes-subject-page-bucketizer": "^0.0.4-alpha.0",
+		"@treecg/ldes-substring-bucketizer": "^0.0.4-alpha.0",
+		"@treecg/ldes-types": "^0.0.4-alpha.0",
 		"commander": "^8.1.0",
 		"date-fns": "^2.23.0",
 		"fast-folder-size": "^1.4.0",
