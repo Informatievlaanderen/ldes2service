@@ -78,7 +78,7 @@ const run = async (_options: OptionValues): Promise<void> => {
 
   ldes.on('end', async () => {
     const hypermediaControls = bucketizer.getBucketHypermediaControlsMap();
-    archive.addHypermediaControls(hypermediaControls);
+    //archive.addHypermediaControls(hypermediaControls);
     await archive.flush();
     process.exit(1);
   });
