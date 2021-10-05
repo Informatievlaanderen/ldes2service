@@ -1,6 +1,6 @@
 import { readdir } from 'fs/promises';
-import type { IWritableConnector, IArchiveExtension } from '@treecg/ldes-types';
 import type * as RDF from '@rdfjs/types';
+import type { IWritableConnector, IArchiveExtension } from '@treecg/ldes-types';
 import * as N3 from 'n3';
 import { DataFactory } from 'rdf-data-factory';
 import { helpers } from './utils/Helpers';
@@ -64,6 +64,13 @@ export class Archive implements IWritableConnector {
     await Promise.all(tasks);
   }
 
+  // TODO: fix this
+  // public addHypermediaControls = (hypermediaControls: Map<string, string[]>): void => {
+  // hypermediaControls.forEach((relations: string[], node: string) => {
+  //     const bucketName = `${node}.ttl`;
+  // });
+  // };
+
   public flush = async (): Promise<void> => {
     if (this.extension !== undefined) {
       const files = await readdir(this.outputDirectory);
@@ -79,6 +86,17 @@ export class Archive implements IWritableConnector {
       }
     }
   };
+
+  // TODO: add hypermedia controls to loca fragments
+  // private readonly createHypermediaControlTriples = (relations: string[]): RDF.Quad[] => {
+  // relations.forEach(node => {
+  //     const treeValues: string[] = [];
+  //     if (node.includes('+')) {
+  //       treeValues.push(...node.split('+'));
+  //     } else {
+  //       treeValues.push(node);
+  //     }
+  // };
 
   private readonly getBucketTriples = (quads: RDF.Quad[]): RDF.Quad[] =>
     quads.filter(quad => quad.predicate.equals(this.bucketPredicate));

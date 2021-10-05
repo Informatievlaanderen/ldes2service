@@ -49,10 +49,11 @@ export class Helpers {
   public getBucketizer = (
     bucketizer: string,
     propertyPath: string,
+    pageSize: number,
   ): Promise<IBucketizer> => {
     switch (bucketizer) {
       case 'substring':
-        return new Promise(resolve => resolve(SubstringBucketizer.build(propertyPath)));
+        return new Promise(resolve => resolve(SubstringBucketizer.build(propertyPath, pageSize)));
       case 'subject-page':
         return new Promise(resolve => resolve(SubjectPageBucketizer.build(propertyPath)));
       default:

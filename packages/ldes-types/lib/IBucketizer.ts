@@ -9,10 +9,12 @@ export abstract class IBucketizer {
   public readonly propertyPath: string;
   public propertyPathQuads: RDF.Quad[];
   public readonly factory: RDF.DataFactory;
+  private readonly bucketHypermediaControlsMap: Map<string, string[]>;
 
   public constructor(propertyPath: string) {
     this.factory = new DataFactory();
     this.propertyPath = propertyPath;
+    this.bucketHypermediaControlsMap = new Map<string, string[]>();
   }
 
   public init = (): Promise<void> => new Promise((resolve, reject) => {
@@ -39,6 +41,9 @@ export abstract class IBucketizer {
    */
   public abstract bucketize: (quads: RDF.Quad[], memberId: string) => void;
 
+  /**
+   * Selects the bucket for the LDES member based on the value of the property path object
+   */
   public abstract createBuckets: (propertyPathObject: RDF.Term[]) => string[];
 
   /**
@@ -62,4 +67,12 @@ export abstract class IBucketizer {
 
   private readonly getEntryBlanknode = (): RDF.Quad =>
     this.propertyPathQuads.find(quad => quad.predicate.value === 'https://w3id.org/tree#path')!;
+
+  public getBucketHypermediaControlsMap = (): Map<string, string[]> => this.bucketHypermediaControlsMap;
+
+  public getHypermediaControls = (bucket: string): string[] | undefined => this.bucketHypermediaControlsMap.get(bucket);
+
+  public addHypermediaControls = (bucket: string, controls: string[]): void => {
+    this.bucketHypermediaControlsMap.set(bucket, controls);
+  };
 }

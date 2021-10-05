@@ -19,6 +19,11 @@ program
     'The property path the must be used in the bucktizer',
   )
   .option(
+    '-s, --substringBucketSize <size>',
+    'The page size for buckets when page size is set to "substring". Default 50.',
+    '50',
+  )
+  .option(
     '--extension <extension>',
     'Set the name of the extension. For the moment only "azure" is supported',
   )
@@ -55,7 +60,7 @@ const run = async (_options: OptionValues): Promise<void> => {
 
   let bucketizer: IBucketizer;
   if (_options.bucketizer) {
-    bucketizer = await helpers.getBucketizer(_options.bucketizer, _options.propertyPath);
+    bucketizer = await helpers.getBucketizer(_options.bucketizer, _options.propertyPath, _options.substringBucketSize);
   }
 
   const LDESClient = newEngine();
@@ -72,6 +77,8 @@ const run = async (_options: OptionValues): Promise<void> => {
   });
 
   ldes.on('end', async () => {
+    const hypermediaControls = bucketizer.getBucketHypermediaControlsMap();
+    archive.addHypermediaControls(hypermediaControls);
     await archive.flush();
     process.exit(1);
   });
