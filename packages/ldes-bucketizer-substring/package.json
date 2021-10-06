@@ -1,6 +1,6 @@
 {
 	"name": "@treecg/ldes-substring-bucketizer",
-	"version": "0.0.5-alpha.0",
+	"version": "0.0.6-alpha.0",
 	"description": "Applies a substring fragmentation to LDES members",
 	"author": "Dwight Van Lancker <dwight.vanlancker@hotmail.com>",
 	"homepage": "https://github.com/Informatievlaanderen/ldes2service#readme",
