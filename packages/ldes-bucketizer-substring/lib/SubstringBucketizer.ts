@@ -47,7 +47,7 @@ export class SubstringBucketizer extends IBucketizer {
 
       for (const part of parts) {
         for (const character of [...part]) {
-          if (this.hasRoom(currentBucket) && currentBucket !== ROOT) {
+          if (this.hasRoom(currentBucket)) {
             this.updateCounter(currentBucket, buckets);
             buckets.push(currentBucket);
             bucketFound = true;
