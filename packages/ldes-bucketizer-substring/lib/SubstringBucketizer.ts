@@ -1,7 +1,7 @@
 import type * as RDF from '@rdfjs/types';
 import { IBucketizer } from '@treecg/ldes-types';
 
-const ROOT = '.root';
+const ROOT = 'root';
 
 export class SubstringBucketizer extends IBucketizer {
   public propertyPath: string;
@@ -47,7 +47,7 @@ export class SubstringBucketizer extends IBucketizer {
 
       for (const part of parts) {
         for (const character of [...part]) {
-          if (this.hasRoom(currentBucket)) {
+          if (this.hasRoom(currentBucket) && currentBucket !== ROOT) {
             this.updateCounter(currentBucket, buckets);
             buckets.push(currentBucket);
             bucketFound = true;
