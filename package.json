@@ -1,9 +1,6 @@
 {
   "private": true,
   "repository": "https://github.com/informatievlaanderen/ldes2service",
-  "workspaces": [
-    "packages/*"
-  ],
   "engines": {
     "node": ">=14.0"
   },

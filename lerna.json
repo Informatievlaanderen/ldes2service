@@ -14,7 +14,6 @@
   "packages": [
     "packages/*"
   ],
-  "useWorkspaces": "true",
   "loglevel": "success",
   "registry": "https://registry.npmjs.org/",
   "npmClient": "yarn",
