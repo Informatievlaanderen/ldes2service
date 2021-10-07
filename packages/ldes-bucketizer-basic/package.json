@@ -30,5 +30,6 @@
   "dependencies": {
     "@rdfjs/types": "^1.0.1",
     "@treecg/ldes-types": "^0.0.4-alpha.0"
-  }
+  },
+  "gitHead": "2e610a95f08484de21793af9f0ff8dc9dfe8ddf1"
 }
