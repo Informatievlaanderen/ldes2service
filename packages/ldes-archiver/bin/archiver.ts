@@ -1,5 +1,4 @@
 import { newEngine } from '@treecg/actor-init-ldes-client';
-import type { IBucketizer } from '@treecg/ldes-types';
 import type { OptionValues } from 'commander';
 import { Command } from 'commander';
 import type { IArchiveOptions, IExtensionOptions } from '../lib/Archive';
@@ -58,29 +57,28 @@ const run = async (_options: OptionValues): Promise<void> => {
     }
   }
 
-  let bucketizer: IBucketizer;
-  if (_options.bucketizer) {
-    bucketizer = await helpers.getBucketizer(_options.bucketizer, _options.propertyPath, _options.substringBucketSize);
-  }
+  // If bucketizer option is not set, fall back to basic bucketizer
+  const bucketizer = await helpers.getBucketizer(
+    _options.bucketizer,
+    _options.propertyPath,
+    _options.substringBucketSize,
+  );
 
   const LDESClient = newEngine();
   const archive = new Archive(archiveOptions);
   await archive.provision();
 
   const ldes = LDESClient.createReadStream(archiveOptions.url, ldesOptions);
-  ldes.on('data', async member => {
-    if (bucketizer) {
-      bucketizer.bucketize(member.quads, member.id);
-    }
+  const tasks: any[] = [];
 
-    await archive.writeVersion(member.quads);
+  ldes.on('data', member => {
+    bucketizer.bucketize(member.quads, member.id);
+    tasks.push(archive.writeVersion(member.quads));
   });
 
   ldes.on('end', async () => {
-    const hypermediaControls = bucketizer.getBucketHypermediaControlsMap();
-    //archive.addHypermediaControls(hypermediaControls);
+    await Promise.all(tasks);
     await archive.flush();
-    process.exit(1);
   });
 };
 

@@ -25,7 +25,7 @@ After passing the subject page bucketizer, the member will have an extra triple:
 ## Install
 
 ```bash
-> npm i @treecg/subject-page-bucketizer
+> npm i @treecg/ldes-subject-page-bucketizer
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ A bucketizer should always be used in combination with the LDES client. More inf
 The bucketizer expects a property path as input and should have the following structure `(<predicate1> <predicate2> ...)`
 
 ```
-import { SubjectPageBucketizer } from '@treecg/subject-page-bucketizer'
+import { SubjectPageBucketizer } from '@treecg/ldes-subject-page-bucketizer'
 
 const run = async (): Promise<void> => {
   const options = {...};

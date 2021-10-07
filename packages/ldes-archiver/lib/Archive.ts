@@ -56,20 +56,10 @@ export class Archive implements IWritableConnector {
 
         tasks.push(this.writeToBucket(bucketPath, quads));
       });
-    } else {
-      const path = `${this.outputDirectory}/bucketless.ttl`;
-      tasks.push(this.writeToBucket(path, quads));
     }
 
     await Promise.all(tasks);
   }
-
-  // TODO: fix this
-  // public addHypermediaControls = (hypermediaControls: Map<string, string[]>): void => {
-  // hypermediaControls.forEach((relations: string[], node: string) => {
-  //     const bucketName = `${node}.ttl`;
-  // });
-  // };
 
   public flush = async (): Promise<void> => {
     if (this.extension !== undefined) {
@@ -87,22 +77,12 @@ export class Archive implements IWritableConnector {
     }
   };
 
-  // TODO: add hypermedia controls to loca fragments
-  // private readonly createHypermediaControlTriples = (relations: string[]): RDF.Quad[] => {
-  // relations.forEach(node => {
-  //     const treeValues: string[] = [];
-  //     if (node.includes('+')) {
-  //       treeValues.push(...node.split('+'));
-  //     } else {
-  //       treeValues.push(node);
-  //     }
-  // };
-
   private readonly getBucketTriples = (quads: RDF.Quad[]): RDF.Quad[] =>
     quads.filter(quad => quad.predicate.equals(this.bucketPredicate));
 
   private readonly writeToBucket = async (bucketPath: string, quads: RDF.Quad[]): Promise<void> => {
     const writer = new N3.Writer();
+
     writer.addQuads(quads);
     writer.end(async (error, result) => {
       if (error) {

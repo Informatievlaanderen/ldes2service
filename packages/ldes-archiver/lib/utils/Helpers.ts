@@ -1,4 +1,5 @@
 import { mkdir, access, writeFile, appendFile } from 'fs/promises';
+import { BasicBucketizer } from '@treecg/ldes-basic-bucketizer';
 import { AzureExtension } from '@treecg/ldes-local-archive-azure-extension';
 import { SubjectPageBucketizer } from '@treecg/ldes-subject-page-bucketizer';
 import { SubstringBucketizer } from '@treecg/ldes-substring-bucketizer';
@@ -56,8 +57,9 @@ export class Helpers {
         return new Promise(resolve => resolve(SubstringBucketizer.build(propertyPath, pageSize)));
       case 'subject-page':
         return new Promise(resolve => resolve(SubjectPageBucketizer.build(propertyPath)));
+      case 'basic':
       default:
-        throw new Error(`[Archiver]: Please provide a valid bucketizer strategy.`);
+        return new Promise(resolve => resolve(BasicBucketizer.build(pageSize)));
     }
   };
 }

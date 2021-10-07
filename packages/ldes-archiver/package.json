@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"@treecg/actor-init-ldes-client": "^2.3.11",
+		"@treecg/ldes-basic-bucketizer": "^0.0.6-alpha.0",
 		"@treecg/ldes-local-archive-azure-extension": "^0.0.4-alpha.0",
 		"@treecg/ldes-subject-page-bucketizer": "^0.0.4-alpha.0",
 		"@treecg/ldes-substring-bucketizer": "^0.0.6-alpha.0",

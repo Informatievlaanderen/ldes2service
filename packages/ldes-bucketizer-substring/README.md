@@ -31,7 +31,7 @@ After passing through the bucketizer, the LDES member will have extra triples:
 ## Install
 
 ```bash
-> npm i @treecg/substring-bucketizer
+> npm i @treecg/ldes-substring-bucketizer
 ```
 
 ## Usage
@@ -41,7 +41,7 @@ A bucketizer should always be used in combination with the LDES client. More inf
 The bucketizer expects a property path as input and should have the following structure `(<predicate1> <predicate2> ...)`
 
 ```
-import { SubstringBucketzer } from '@treecg/substring-bucketizer'
+import { SubstringBucketzer } from '@treecg/ldes-substring-bucketizer'
 
 const run = async (): Promise<void> => {
   const options = {...};
