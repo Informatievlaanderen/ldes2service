@@ -104,7 +104,7 @@ export class SubstringBucketizer extends IBucketizer {
    * @returns the normalized object value
    */
   private readonly normalize = (literal: string): string =>
-    literal.normalize('NFKD')
+    literal.trim().normalize('NFKD')
       .replace(/\p{Diacritic}/gu, '')
       .replace(/[,']/gu, '')
       .replace(/[-]/gu, ' ')
