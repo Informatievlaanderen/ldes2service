@@ -1,5 +1,5 @@
 import type { IConnectorConfig } from '@treecg/ldes-types';
-import * as execa from 'execa';
+import execa = require('execa');
 
 const LDES_CONNECTORS = new Set(['@treecg/ldes-postgres-connector', '@treecg/ldes-mongodb-connector']);
 

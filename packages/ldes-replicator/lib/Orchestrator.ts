@@ -37,8 +37,8 @@ export class Orchestrator {
 
       return new Promise<void>((resolve, reject) => {
         ldesObject.stream
-          .on('readable', async () => {
-            await this.processData(ldesObject, connectors);
+          .on('data', async member => {
+            await this.processMember(member.object, connectors);
           })
           .on('error', (error: any) => reject(error));
 
@@ -53,28 +53,29 @@ export class Orchestrator {
     const promises: Promise<void>[] = [];
     const state = this.stateStore.provision();
 
-    Object.values(this.ldesObjects).forEach(ldesObject => {
-      const ldesConnectors: IWritableConnector[] = Object.values(this.connectorsConfig).map(
-        (con: IConnectorConfig) => {
-          const config = con.settings || {};
-          const Connector = require(con.type || '@ldes/ldes-dummy-connector');
-
-          const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
-
-          if (!connectorName) {
-            throw new Error(`The connector ${con.type} couldn't be loaded correctly!`);
-          }
-
-          const connector = new Connector[connectorName](config, ldesObject.shape, ldesObject.name);
-
-          promises.push(connector.provision());
-
-          return connector;
+    for (const ldesObject of Object.values(this.ldesObjects)) {
+      const ldesConnectors: IWritableConnector[] = [];
+      for (const con of Object.values(this.connectorsConfig)) {
+        const config = con.settings || {};
+        let Connector;
+        if (con.type) {
+          Connector = await import(`${con.type}`);
+        } else {
+          throw new Error('connector not found');
         }
-      );
+        const connectorName = Object.keys(Connector).find(key => key.endsWith('Connector'));
 
+        if (!connectorName) {
+          throw new Error(`The connector ${con.type} couldn't be loaded correctly!`);
+        }
+
+        const connector = new Connector[connectorName](config, ldesObject.shape, ldesObject.name);
+
+        promises.push(connector.provision());
+        ldesConnectors.push(connector);
+      }
       this.ldesConnectors.set(ldesObject, ldesConnectors);
-    });
+    }
 
     await Promise.all([state, ...promises]);
 
@@ -98,5 +99,9 @@ export class Orchestrator {
 
       member = ldesObject.stream.read();
     }
+  }
+
+  protected async processMember(member: string, connectors: IWritableConnector[]): Promise<void> {
+    await Promise.all(connectors.map(con => con.writeVersion(member)));
   }
 }

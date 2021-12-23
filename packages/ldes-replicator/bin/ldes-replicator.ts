@@ -5,8 +5,8 @@
 import * as fs from 'fs/promises';
 import { Command, flags } from '@oclif/command';
 import { newEngine } from '@treecg/actor-init-ldes-client';
-import type { IRedisStateConfig } from '@treecg/ldes-redis-state';
-import { RedisState } from '@treecg/ldes-redis-state';
+import type { IRedisStateConfig } from '../../ldes-redis-state';
+import { RedisState } from '../../ldes-redis-state';
 import type { ConnectorConfigs, LdesObjects, LdesShape } from '@treecg/ldes-types';
 import type { Quad } from 'n3';
 import { DataFactory, Store } from 'n3';
@@ -137,6 +137,7 @@ class LdesReplicator extends Command {
 
     const options = {
       pollingInterval: config.replicator.polling_interval,
+      representation: 'Object',
     };
 
     const streams: LdesObjects = Object.fromEntries(

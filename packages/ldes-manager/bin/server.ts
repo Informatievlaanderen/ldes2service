@@ -1,4 +1,4 @@
-import type { IGeneratorPluginOptions } from '@ldes/types';
+import type { IGeneratorPluginOptions } from '@treecg/ldes-types';
 import type { FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
 import FastifyCors from 'fastify-cors';

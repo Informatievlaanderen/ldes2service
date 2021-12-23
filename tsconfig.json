@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": ["es6", "es2019", "esnext.asynciterable"],
     "target": "es2017",
+    "outDir": "./",
     "preserveConstEnums": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
@@ -14,6 +15,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": [
     "packages/*/index.ts",
