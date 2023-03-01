@@ -37,8 +37,8 @@ export class Orchestrator {
 
       return new Promise<void>((resolve, reject) => {
         ldesObject.stream
-          .on('readable', async () => {
-            await this.processData(ldesObject, connectors);
+          .on('data', async member => {
+            await this.processMember(member.object, connectors);
           })
           .on('error', (error: any) => reject(error));
 
@@ -70,7 +70,7 @@ export class Orchestrator {
           promises.push(connector.provision());
 
           return connector;
-        }
+        },
       );
 
       this.ldesConnectors.set(ldesObject, ldesConnectors);
@@ -88,15 +88,7 @@ export class Orchestrator {
     throw new Error('not implemented');
   }
 
-  protected async processData(ldesObject: LdesObject, connectors: IWritableConnector[]): Promise<void> {
-    let member: string = ldesObject.stream.read();
-
-    while (member) {
-      const copiedMember = member;
-
-      await Promise.all(connectors.map(con => con.writeVersion(copiedMember)));
-
-      member = ldesObject.stream.read();
-    }
+  protected async processMember(member: string, connectors: IWritableConnector[]): Promise<void> {
+    await Promise.all(connectors.map(con => con.writeVersion(member)));
   }
 }

@@ -1,7 +1,7 @@
-import type { IGeneratorPluginOptions } from '@ldes/types';
+import FastifyCors from '@fastify/cors';
+import type { IGeneratorPluginOptions } from '@treecg/ldes-types';
 import type { FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
-import FastifyCors from 'fastify-cors';
 import AvailableConnectorsRoute from '../lib/routes/AvailableConnectors.route';
 import ConnectorRoute from '../lib/routes/Connector.route';
 import GeneratorRoute from '../lib/routes/Generator.route';
@@ -28,4 +28,4 @@ const start = async (): Promise<void> => {
   }
 };
 
-start();
+start().catch(error => console.error(error));

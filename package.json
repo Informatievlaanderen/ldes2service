@@ -21,9 +21,9 @@
     "collectCoverage": true
   },
   "scripts": {
-    "start": "node ./packages/ldes-replicator/bin/ldes-replicator.js",
+    "start": "node ./packages/ldes-replicator/bin/ldes-replicator.js -s",
     "build-changed": "lerna run build --since HEAD",
-    "build": "npm run build:ts",
+    "build": "rm -rf packages/*/*.d.ts && npm run build:ts",
     "build:ts": "tsc",
     "start:docker": "node docker_setup.js && npm run start",
     "test:unit": "jest __tests__/unit",

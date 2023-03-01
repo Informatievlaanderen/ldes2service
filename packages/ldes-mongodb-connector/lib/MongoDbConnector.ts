@@ -39,7 +39,7 @@ export class MongoDbConnector implements IWritableConnector {
    * @param member
    */
   public async writeVersion(member: any): Promise<void> {
-    const JSONmember = JSON.parse(member);
+    const JSONmember = member;
 
     const data: any = {};
 
@@ -59,8 +59,8 @@ export class MongoDbConnector implements IWritableConnector {
    */
   public async provision(): Promise<void> {
     const url = this.getURI();
-
-    this.client = new MongoClient(url);
+    console.debug(`Connecting to MongoDB instance at ${url}`);
+    this.client = new MongoClient(url, { useUnifiedTopology: true });
 
     this.shape?.forEach(field => {
       const slugField = MongoDbConnector.extractAndSlug(field.path);

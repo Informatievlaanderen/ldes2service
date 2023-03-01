@@ -32,7 +32,7 @@ export class RedisState implements IState {
   }
 
   public async getProcessedPages(): Promise<Url[]> {
-    return JSON.parse((await this.client.get(`ldes_${this.settings.id}_pages`)) ?? '[]');
+    return JSON.parse(await this.client.get(`ldes_${this.settings.id}_pages`) ?? '[]');
   }
 
   public async provision(): Promise<void> {
@@ -41,6 +41,7 @@ export class RedisState implements IState {
       port: this.settings.port ?? 6_379,
       password: this.settings.password ?? '',
     });
+    console.debug(`Connected to state Redis store on ${this.settings.host}:${this.settings.port}`);
   }
 
   private async setPages(pages: Url[]): Promise<void> {

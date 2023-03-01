@@ -94,6 +94,7 @@ module.exports = {
     ],
     '@typescript-eslint/promise-function-async': 'off',
     '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'angle-bracket' }],
+    "@typescript-eslint/no-unnecessary-type-assertion": 'off',
     '@typescript-eslint/member-naming': 'off',
     '@typescript-eslint/naming-convention': [
       'error',

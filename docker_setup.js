@@ -19,7 +19,7 @@ async function setup() {
 
     for (let con of connectors) {
       config.connectors[con] = {
-        type: process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector',
+        type: process.env[`CONNECTOR_${con}_TYPE`] || '@treecg/ldes-dummy-connector',
         settings: JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}'),
       }
     }

@@ -25,7 +25,7 @@ async function run(): Promise<void> {
 
   const streams = [LDESClient.createReadStream('LDES.example', streamOptions)];
 
-  const orchestrator = new Orchestrator(connectors, state, streams);
+  const orchestrator = new Orchestrator(state, streams, connectors);
 
   await orchestrator.provision();
   await orchestrator.run();
