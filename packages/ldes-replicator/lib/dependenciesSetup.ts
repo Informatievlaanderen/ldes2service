@@ -1,7 +1,7 @@
 import type { IConnectorConfig } from '@treecg/ldes-types';
-import * as execa from 'execa';
+const execa = require('execa');
 
-const LDES_CONNECTORS = new Set(['@treecg/ldes-postgres-connector', '@treecg/ldes-mongodb-connector']);
+const LOCAL_LDES_CONNECTORS = new Set(['@treecg/ldes-postgres-connector', '@treecg/ldes-mongodb-connector']);
 
 export async function dependenciesSetup(config: any): Promise<void> {
   const neededConnectors = Object.values(config.connectors).map((con: IConnectorConfig) => con.type);
@@ -10,7 +10,7 @@ export async function dependenciesSetup(config: any): Promise<void> {
     console.log(`Adding ${con}...`);
     await execa('npm', ['run', 'lerna', '--', 'add', con, '--scope=@treecg/ldes-replicator']);
   }
-  if (neededConnectors.filter(el => !LDES_CONNECTORS.has(el)).length === 0) {
+  if (neededConnectors.filter(el => !LOCAL_LDES_CONNECTORS.has(el)).length === 0) {
     console.log('Skipping install...');
     return;
   }

@@ -1,7 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "lib": ["es6", "es2019", "esnext.asynciterable"],
     "target": "es2017",
     "preserveConstEnums": true,
@@ -14,6 +14,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution":"node"
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   },
   "include": [
     "packages/*/index.ts",

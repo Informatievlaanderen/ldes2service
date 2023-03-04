@@ -28,6 +28,7 @@ interface IReplicatorConfig {
     }[];
     state: IRedisStateConfig;
     polling_interval: number;
+    requestsPerMinute: number;
   };
   connectors: ConnectorConfigs;
 }
@@ -137,7 +138,9 @@ class LdesReplicator extends Command {
 
     const options = {
       pollingInterval: config.replicator.polling_interval,
+      requestsPerMinute: config.replicator.requestsPerMinute,
       representation: 'Object',
+      disableSynchronization: true,
     };
 
     const streams: LdesObjects = Object.fromEntries(

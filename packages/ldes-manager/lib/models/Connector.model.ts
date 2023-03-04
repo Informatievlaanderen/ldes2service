@@ -8,7 +8,6 @@ import {
   PrimaryKey,
   AllowNull,
   DataType,
-  HasMany,
   AutoIncrement,
   BelongsToMany,
 } from 'sequelize-typescript';
@@ -20,25 +19,25 @@ export class Connector extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
-  id: Number;
+  declare id: number;
 
   @Unique
   @AllowNull(false)
   @Column
-  name: String;
+  name: string;
 
   @AllowNull(false)
   @Column
-  image: String;
+  image: string;
 
   @AllowNull(false)
   @Column
-  type: String;
+  type: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.INTEGER)
-  port: Number;
+  port: number;
 
   @AllowNull(false)
   @Column(DataType.JSON)
@@ -48,8 +47,8 @@ export class Connector extends Model {
   orchestrators: Orchestrator[];
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 }

@@ -22,7 +22,7 @@
 		"url": "https://github.com/Informatievlaanderen/ldes2service/issues"
 	},
 	"dependencies": {
-		"@azure/storage-blob": "^12.7.0",
+		"@azure/storage-blob": "^12.13.0",
 		"@treecg/ldes-types": "^0.0.4-alpha.0"
 	},
 	"devDependencies": {

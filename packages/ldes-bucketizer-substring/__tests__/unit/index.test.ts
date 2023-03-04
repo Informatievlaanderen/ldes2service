@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-undef */
 /* eslint-disable mocha/valid-test-description */
 import type * as RDF from '@rdfjs/types';
 import { DataFactory } from 'rdf-data-factory';
@@ -10,10 +12,9 @@ describe('ldes-substring-bucketizer', () => {
   let targetNode: RDF.NamedNode;
   let bucketNode: RDF.NamedNode;
 
-  // eslint-disable-next-line no-undef
   beforeAll(async () => {
     factory = new DataFactory();
-    bucketizer = new SubstringBucketizer('(<http://www.w3.org/2000/01/rdf-schema#label>)');
+    bucketizer = new SubstringBucketizer('(<http://www.w3.org/2000/01/rdf-schema#label>)', 2);
     targetNode = factory.namedNode('http://www.w3.org/2000/01/rdf-schema#label');
     bucketNode = factory.namedNode('https://w3id.org/ldes#bucket');
   });

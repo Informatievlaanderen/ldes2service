@@ -22,7 +22,7 @@ export class Orchestrator extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column(DataType.BIGINT)
-  id: Number;
+  declare id: Number;
 
   @IsUrl
   @AllowNull(false)
@@ -47,8 +47,8 @@ export class Orchestrator extends Model {
   connectors: Connector[];
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: Date;
 }

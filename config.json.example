@@ -2,28 +2,25 @@
   "replicator": {
     "ldes": [
       {
-        "url": "https://smartdata.dev-vlaanderen.be/base/straatnaam"
-      },
-      {
-        "url": "https://smartdata.dev-vlaanderen.be/base/postinfo",
-        "shapeUrl": "/home/cruizher/Documents/shape.ttl"
+        "url": "https://treecg.github.io/Blue-Bike-to-OSLO/root.ttl"
       }
     ],
     "state": {
       "id": "replicator",
-      "host": "localhost"
+      "host": "localhost",
+      "port": 6379
     },
-    "polling_interval": 5000
+    "polling_interval": 5000,
+    "requestsPerMinute": 6
   },
   "connectors": {
-    "PG": {
-      "type": "@ldes/ldes-postgres-connector",
+    "ngsild": {
+      "type": "@treecg/connector-write-ngsi-ld",
       "settings": {
-        "username": "postgres",
-        "password": "postgres",
-        "database": "postgres",
-        "hostname": "localhost",
-        "port": 5432
+        "tokenEndpoint": "",
+        "clientId": "",
+        "clientSecret": "",
+        "ngsiEndpoint": "http://localhost:9090/ngsi-ld/v1/"
       }
     }
   }

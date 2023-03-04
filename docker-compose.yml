@@ -35,17 +35,23 @@ services:
       POLL_INTERVAL: '5000'
       CONNECTORS: '[0,1]'
       CONNECTOR_0_TYPE: '@ldes/ldes-postgres-connector'
-      CONNECTOR_0_CONFIG: '{"amountOfVersions":0,
-        "tableName":"ldes",
-        "username":"${POSTGRES_USER}",
-        "password":"${POSTGRES_PASSWORD}",
-        "database":"${POSTGRES_DB}",
-        "hostname":"postgres",
-        "port":5432}'
+      CONNECTOR_0_CONFIG: '{
+          "amountOfVersions":0,
+          "tableName":"ldes",
+          "username":"${POSTGRES_USER}",
+          "password":"${POSTGRES_PASSWORD}",
+          "database":"${POSTGRES_DB}",
+          "hostname":"postgres",
+          "port":5432
+        }'
       CONNECTOR_1_TYPE: '@ldes/ldes-mongodb-connector'
-      CONNECTOR_1_CONFIG: '{"amountOfVersions":0,
-        "username":"${MONGO_USER}",
-        "password":"${MONGO_PASSWORD}",
-        "database":"${MONGO_DB}",
-        "hostname":"mongo",
-        "port":27017}'
+      CONNECTOR_1_CONFIG: '{
+          "amountOfVersions":0,
+          "username":"${MONGO_USER}",
+          "password":"${MONGO_PASSWORD}",
+          "database":"${MONGO_DB}",
+          "hostname":"mongo",
+          "port":27017
+        }'
+    depends_on:
+      - redis
