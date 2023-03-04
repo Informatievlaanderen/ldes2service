@@ -1,8 +1,8 @@
 import type * as RDF from '@rdfjs/types';
-import { findNodes } from 'clownface-shacl-path';
 import { DataFactory } from 'rdf-data-factory';
 const { dataset } = require('@rdfjs/dataset');
 const clownface = require('clownface');
+const { findNodes } = require('clownface-shacl-path');
 const N3 = require('n3');
 
 export abstract class IBucketizer {

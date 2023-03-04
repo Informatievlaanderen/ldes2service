@@ -30,8 +30,8 @@
     "@treecg/ldes-mongodb-connector": "^0.0.4-alpha.0",
     "@treecg/ldes-postgres-connector": "^0.0.4-alpha.0",
     "@treecg/ldes-types": "^0.0.4-alpha.0",
-    "fastify": "^3.19.1",
-    "fastify-plugin": "^3.0.0"
+    "fastify": "^4.14.0",
+    "fastify-plugin": "^4.5.0"
   },
   "devDependencies": {
     "typescript": "^4.4.3"

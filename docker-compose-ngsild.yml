@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - "2181"
+    logging:
+      driver: none
+  kafka:
+    image: bitnami/kafka
+    ports:
+      - "9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_LOG_RETENTION_MS: 10000
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+    logging:
+      driver: none
+  postgres:
+    image: postgis/postgis
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ngb
+      POSTGRES_PASSWORD: ngb
+      POSTGRES_DB: ngb
+    logging:
+      driver: none
+#    volumes:
+#      - /custom/mount:/var/lib/postgresql/data
+  scorpio:
+    image: scorpiobroker/all-in-one-runner:spring-kafka-latest
+    ports:
+      - "9090:9090"
+    depends_on:
+      - postgres
+      - kafka
+  redis:
+    image: redis:6
+    command: redis-server --appendonly yes
+    ports:
+      - 6379:6379
+  replicator:
+    build: .
+    environment:
+      URLS: https://treecg.github.io/Blue-Bike-to-OSLO/root.ttl
+      STATE_CONFIG: '{"id":"replicator_0", "host":"redis", "port":6379}'
+      POLL_INTERVAL: '5000'
+      REQ_PER_MINUTE: '6'
+      CONNECTORS: '[0]'
+      CONNECTOR_0_TYPE: '@treecg/connector-write-ngsi-ld'
+      CONNECTOR_0_CONFIG: '{
+          "tokenEndpoint": "",
+          "clientId": "",
+          "clientSecret": "",
+          "ngsiEndpoint": "http://scorpio:9090/ngsi-ld/v1/"
+        }'
+    depends_on:
+      - redis
+      - scorpio

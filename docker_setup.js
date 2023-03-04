@@ -12,14 +12,14 @@ async function setup() {
 
     config.replicator.state = JSON.parse(process.env.STATE_CONFIG || '{"id":"replicator"}');
     config.replicator.polling_interval = Number.parseInt(process.env.POLL_INTERVAL || '5000');
-
     config.replicator.ldes = process.env.URLS.split(',').map(url => { return { url } });
+    config.replicator.requestsPerMinute = Number.parseInt(process.env.REQ_PER_MINUTE || '60');
 
     const connectors = JSON.parse(process.env.CONNECTORS || '[]');
 
     for (let con of connectors) {
       config.connectors[con] = {
-        type: process.env[`CONNECTOR_${con}_TYPE`] || '@ldes/ldes-dummy-connector',
+        type: process.env[`CONNECTOR_${con}_TYPE`] || '@treecg/ldes-dummy-connector',
         settings: JSON.parse(process.env[`CONNECTOR_${con}_CONFIG`] || '{}'),
       }
     }

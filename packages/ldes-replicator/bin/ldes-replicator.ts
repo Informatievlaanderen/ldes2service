@@ -28,6 +28,7 @@ interface IReplicatorConfig {
     }[];
     state: IRedisStateConfig;
     polling_interval: number;
+    requestsPerMinute: number;
   };
   connectors: ConnectorConfigs;
 }
@@ -47,7 +48,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
       datatype: 'https://www.w3.org/ns/shacl#IRI',
     },
   ];
-  const { quads: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
+  const { data: ldesQuads } = await rdfDereferencer.dereference(ldesURI);
 
   // This is the store with shacl quads
   let store: Store = new Store();
@@ -65,7 +66,7 @@ async function fetchShape({ ldesURI, shapeURI }: Record<string, any>): Promise<L
       });
   }
   if (store.size === 0 && shapeURI) {
-    const { quads: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
+    const { data: shapeQuads } = await rdfDereferencer.dereference(shapeURI, { localFiles: true });
     store = <Store> await storeStream(shapeQuads);
   }
 
@@ -130,13 +131,16 @@ class LdesReplicator extends Command {
     const config: IReplicatorConfig = JSON.parse(await fs.readFile(args.CONFIG, { encoding: 'utf8' }));
 
     if (fl.setup) {
-      return await dependenciesSetup(config);
+      await dependenciesSetup(config);
     }
 
     const state = new RedisState(config.replicator.state);
 
     const options = {
       pollingInterval: config.replicator.polling_interval,
+      requestsPerMinute: config.replicator.requestsPerMinute,
+      representation: 'Object',
+      disableSynchronization: true,
     };
 
     const streams: LdesObjects = Object.fromEntries(

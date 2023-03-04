@@ -35,14 +35,11 @@ export class Orchestrator {
         return;
       }
 
-      return new Promise<void>((resolve, reject) => {
-        ldesObject.stream
-          .on('readable', async () => {
-            await this.processData(ldesObject, connectors);
-          })
-          .on('error', (error: any) => reject(error));
-
-        ldesObject.stream.on('end', () => resolve());
+      return new Promise<void>(async (resolve, reject) => {
+        ldesObject.stream.on('readable', async () => {
+          await this.writeMembers(ldesObject, connectors);
+        }).on('error', error => reject(error))
+          .on('end', () => resolve());
       });
     });
 
@@ -70,7 +67,7 @@ export class Orchestrator {
           promises.push(connector.provision());
 
           return connector;
-        }
+        },
       );
 
       this.ldesConnectors.set(ldesObject, ldesConnectors);
@@ -88,15 +85,13 @@ export class Orchestrator {
     throw new Error('not implemented');
   }
 
-  protected async processData(ldesObject: LdesObject, connectors: IWritableConnector[]): Promise<void> {
-    let member: string = ldesObject.stream.read();
+  protected async writeMembers(ldesIterator: LdesObject, connectors: IWritableConnector[]): Promise<void> {
+    let member = ldesIterator.stream.read();
 
     while (member) {
-      const copiedMember = member;
-
-      await Promise.all(connectors.map(con => con.writeVersion(copiedMember)));
-
-      member = ldesObject.stream.read();
+      const memberRef = member;
+      await Promise.all(connectors.map(con => con.writeVersion(memberRef)));
+      member = ldesIterator.stream.read();
     }
   }
 }

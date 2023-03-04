@@ -1,24 +1,28 @@
-mongo:
-  image: 'bitnami/mongodb'
-  restart: 'always'
-  environment:
-    MONGODB_USERNAME: ${MONGO_USER}
-    MONGODB_PASSWORD: ${MONGO_PASSWORD}
-    MONGODB_DATABASE: ${MONGO_DB}
-  ports:
-    - 27017:27017
+version: '3'
 
-postgres:
-  image: postgres:13-alpine
-  environment:
-    POSTGRES_DB: ${POSTGRES_DB}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  ports:
-    - 5432:5432
+services:
+  mongo:
+    image: 'bitnami/mongodb'
+    restart: 'always'
+    environment:
+      MONGODB_USERNAME: ${MONGO_USER}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD}
+      MONGODB_DATABASE: ${MONGO_DB}
+      ALLOW_EMPTY_PASSWORD: 'yes'
+    ports:
+      - 27017:27017
 
-redis:
-  image: redis:6
-  command: redis-server --appendonly yes
-  ports:
-    - 6379:6379
+  postgres:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:6
+    command: redis-server --appendonly yes
+    ports:
+      - 6379:6379

@@ -1,5 +1,5 @@
 import { readdir, unlink } from 'fs/promises';
-import path = require('path');
+import path from 'path';
 import type { ContainerClient } from '@azure/storage-blob';
 import { BlobServiceClient } from '@azure/storage-blob';
 import type { IArchiveExtension } from '@treecg/ldes-types';
@@ -23,7 +23,7 @@ export class AzureExtension implements IArchiveExtension {
     const exists = await this.containerClient.exists();
     if (!exists) {
       throw new Error(
-        `[AzureExtension]: It seems that the container with name '${this.containerName}' does not exist. Please create it.`
+        `[AzureExtension]: It seems that the container with name '${this.containerName}' does not exist. Please create it.`,
       );
     }
   }
