@@ -11,7 +11,7 @@
     "build:ts": "tsc",
     "start:docker": "node docker_setup.js && npm run start",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules npx jest __tests__/unit",
-    "test:integration": "jest __tests__/integration --passWithNoTests",
+    "test:integration": "jest __tests__/integration",
     "test:integration:docker": "sudo docker-compose -f docker-compose.test.yml up -d && sleep 2 && npm run test:integration && sudo docker-compose -f docker-compose.test.yml down",
     "eslint": "eslint --ext ts",
     "eslint:cache": "npm run eslint -- --cache",
@@ -28,6 +28,7 @@
     "watch": "tsc && tsc -w"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.20.2",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.14.6",
     "babel-jest": "^29.4.3",

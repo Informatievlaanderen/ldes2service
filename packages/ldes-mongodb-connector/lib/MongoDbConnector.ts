@@ -39,10 +39,9 @@ export class MongoDbConnector implements IWritableConnector {
    * @param member
    */
   public async writeVersion(member: any): Promise<void> {
-    const JSONmember = member;
+    const JSONmember = typeof member === 'string' ? JSON.parse(member) : member;
 
     const data: any = {};
-
     Array.from(this.columnToFieldPath.keys()).forEach(key => {
       // @ts-expect-error get never returns undefined
       data[key] = this.getField(JSONmember[this.columnToFieldPath.get(key)]);

@@ -8,6 +8,7 @@ services:
       MONGODB_USERNAME: ${MONGO_USER}
       MONGODB_PASSWORD: ${MONGO_PASSWORD}
       MONGODB_DATABASE: ${MONGO_DB}
+      ALLOW_EMPTY_PASSWORD: 'yes'
     ports:
       - 27017:27017
 
