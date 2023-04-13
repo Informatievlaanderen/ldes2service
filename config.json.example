@@ -20,7 +20,9 @@
         "tokenEndpoint": "",
         "clientId": "",
         "clientSecret": "",
-        "ngsiEndpoint": "http://localhost:9090/ngsi-ld/v1/"
+        "ngsiEndpoint": "http://localhost:9090/ngsi-ld/v1/",
+        "timestampPath": "http://purl.org/dc/elements/1.1/date",
+        "versionOfPath": "http://purl.org/dc/terms/isVersionOf"
       }
     }
   }

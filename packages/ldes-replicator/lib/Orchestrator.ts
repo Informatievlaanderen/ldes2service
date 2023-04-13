@@ -90,7 +90,7 @@ export class Orchestrator {
 
     while (member) {
       const memberRef = member;
-      await Promise.all(connectors.map(con => con.writeVersion(memberRef)));
+      await Promise.all(connectors.map(con => con.writeVersion(memberRef.object)));
       member = ldesIterator.stream.read();
     }
   }
