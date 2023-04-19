@@ -140,7 +140,6 @@ class LdesReplicator extends Command {
       pollingInterval: config.replicator.polling_interval,
       requestsPerMinute: config.replicator.requestsPerMinute,
       representation: OutputRepresentation.Object,
-      disableSynchronization: true,
       loggingLevel: 'debug',
     };
 
