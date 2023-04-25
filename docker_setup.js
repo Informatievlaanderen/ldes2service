@@ -14,6 +14,8 @@ async function setup() {
     config.replicator.polling_interval = Number.parseInt(process.env.POLL_INTERVAL || '5000');
     config.replicator.ldes = process.env.URLS.split(',').map(url => { return { url } });
     config.replicator.requestsPerMinute = Number.parseInt(process.env.REQ_PER_MINUTE || '60');
+    config.replicator.fromTime = process.env.FROM_TIME;
+    config.replicator.fromTimeStrict = process.env.FROM_TIME_STRICT || false;
 
     const connectors = JSON.parse(process.env.CONNECTORS || '[]');
 
