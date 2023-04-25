@@ -8,6 +8,7 @@ import { newEngine, OutputRepresentation } from '@treecg/actor-init-ldes-client'
 import type { IRedisStateConfig } from '@treecg/ldes-redis-state';
 import { RedisState } from '@treecg/ldes-redis-state';
 import type { ConnectorConfigs, LdesObjects, LdesShape } from '@treecg/ldes-types';
+import moment from 'moment';
 import type { Quad } from 'n3';
 import { DataFactory, Store } from 'n3';
 import rdfDereferencer from 'rdf-dereference';
@@ -29,6 +30,8 @@ interface IReplicatorConfig {
     state: IRedisStateConfig;
     polling_interval: number;
     requestsPerMinute: number;
+    fromTime: string;
+    fromTimeStrict: string;
   };
   connectors: ConnectorConfigs;
 }
@@ -136,11 +139,23 @@ class LdesReplicator extends Command {
 
     const state = new RedisState(config.replicator.state);
 
+    let fromTime;
+    if (config.replicator.fromTime && moment(config.replicator.fromTime).isValid()) {
+      fromTime = new Date(config.replicator.fromTime);
+    }
+
+    let fromTimeStrict;
+    if (config.replicator.fromTimeStrict) {
+      fromTimeStrict = config.replicator.fromTimeStrict === 'true';
+    }
+
     const options = {
       pollingInterval: config.replicator.polling_interval,
       requestsPerMinute: config.replicator.requestsPerMinute,
       representation: OutputRepresentation.Object,
       loggingLevel: 'debug',
+      fromTime,
+      fromTimeStrict,
     };
 
     const streams: LdesObjects = Object.fromEntries(
