@@ -11,15 +11,14 @@
       "port": 6379
     },
     "polling_interval": 5000,
-    "requestsPerMinute": 6
+    "requestsPerMinute": 6,
+    "fromTime": "2023-04-25T00:00:00",
+    "fromTimeStrict": "true"
   },
   "connectors": {
     "ngsild": {
       "type": "@treecg/connector-write-ngsi-ld",
       "settings": {
-        "tokenEndpoint": "",
-        "clientId": "",
-        "clientSecret": "",
         "ngsiEndpoint": "http://localhost:9090/ngsi-ld/v1/",
         "timestampPath": "http://purl.org/dc/elements/1.1/date",
         "versionOfPath": "http://purl.org/dc/terms/isVersionOf"
